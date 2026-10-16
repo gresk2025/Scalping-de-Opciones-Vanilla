@@ -29,6 +29,7 @@ class TradingBot:
         self.active_trade: Optional[Dict[str, Any]] = None
         self._running = False
         self.last_trade_time = 0
+        self.last_scan_log = 0
 
     async def initialize(self):
         self.settings = load_settings()
