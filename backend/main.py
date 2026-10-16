@@ -218,7 +218,12 @@ async def get_klines(request: Request):
 async def get_history(request: Request):
     if not is_user_authenticated(request):
         raise HTTPException(status_code=401, detail="No autorizado")
-    return get_trades_history(50)
+    state = bot.get_dashboard_state()
+    return {
+        "active_trade": state.get("active_trade"),
+        "pending_setup": state.get("pending_setup"),
+        "trades": get_trades_history(50)
+    }
 
 @app.post("/api/control/toggle")
 async def toggle_bot(request: Request):

@@ -226,16 +226,20 @@ class TradingBot:
                 except Exception:
                     pass
 
+            entry_sol = self.active_trade.get("entry_sol_price", current_sol)
+
             active_info = {
                 **self.active_trade,
                 "current_sol": current_sol,
+                "entry_sol_price": entry_sol,
                 "current_premium": cur_prem,
                 "unrealized_pnl_usd": pnl_usd,
                 "unrealized_pnl_pct": pnl_pct,
                 "elapsed_minutes": elapsed_min,
                 "max_minutes": self.settings.get("max_trade_duration_minutes", 90),
                 "take_profit_target_pct": self.settings.get("take_profit_pct", 0.75) * 100,
-                "stop_loss_target_pct": -self.settings.get("stop_loss_pct", 0.35) * 100
+                "stop_loss_target_pct": -self.settings.get("stop_loss_pct", 0.35) * 100,
+                "log": f"Operación en curso iniciada en SOL ${entry_sol:.2f}. Monitoreando TP (+75%), SL (-35%) o cierre temporal a los 90 min."
             }
 
         status_text = "RUNNING"
@@ -243,6 +247,8 @@ class TradingBot:
             status_text = "CIRCUIT_BREAKER"
         elif not self.settings.get("bot_running"):
             status_text = "PAUSED"
+
+        pending_setup = self.current_analysis.get("pending_setup") if self.current_analysis else None
 
         return {
             "status": status_text,
@@ -255,6 +261,8 @@ class TradingBot:
             "ws_connected": self.md.is_connected,
             "analysis": self.current_analysis,
             "active_trade": active_info,
+            "pending_setup": pending_setup,
+            "recent_trades": get_trades_history(50),
             "stats": stats,
             "settings": {
                 "max_daily_loss": self.settings.get("max_daily_loss", 5.0),

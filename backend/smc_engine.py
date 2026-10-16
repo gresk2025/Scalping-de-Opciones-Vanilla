@@ -12,7 +12,8 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
             "fib_levels": {},
             "trend": "NEUTRAL",
             "suggested_strike": round(current_price),
-            "suggested_type": "NONE"
+            "suggested_type": "NONE",
+            "pending_setup": None
         }
 
     # 1. Detectar Swing Highs y Swing Lows
@@ -200,15 +201,67 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
             suggested_type = "CALL"
             suggested_strike = math.ceil(current_price + 1.0)
 
-    # 6. Razón Explicativa en lenguaje humano
-    if signal == "BUY_PUT":
-        rationale = f"Confluencia Bajista ({confluence_score}%): {' + '.join(confluence_factors)}. Zona propicia para comprar opción PUT strike  esperando rechazo rápido."
-    elif signal == "BUY_CALL":
-        rationale = f"Confluencia Alcista ({confluence_score}%): {' + '.join(confluence_factors)}. Zona de soporte institucional para opción CALL strike  buscando impulso rápido."
+    # 6. Determinar Nivel / Precio Objetivo en Espera (Setup Acechado)
+    target_price = round(current_price, 2)
+    target_reason = ""
+    target_action = "BUY_CALL" if trend == "BULLISH" else "BUY_PUT"
+    target_type = "CALL" if trend == "BULLISH" else "PUT"
+    target_strike = math.ceil(current_price + 1.0) if trend == "BULLISH" else math.floor(current_price - 1.0)
+
+    if trend == "BULLISH":
+        bull_obs = [ob for ob in active_obs if ob["type"] == "BULLISH"]
+        bull_fvgs = [f for f in active_fvgs if f["type"] == "BULLISH"]
+        if bull_obs:
+            best_ob = max(bull_obs, key=lambda x: x["top"])
+            target_price = round(best_ob["top"], 2)
+            target_reason = f"Order Block Alcista (${best_ob['bottom']:.2f} - ${best_ob['top']:.2f})"
+        elif bull_fvgs:
+            best_fvg = max(bull_fvgs, key=lambda x: x["top"])
+            target_price = round(best_fvg["top"], 2)
+            target_reason = f"FVG Alcista (${best_fvg['bottom']:.2f} - ${best_fvg['top']:.2f})"
+        else:
+            target_price = round(fib_levels["0.618"], 2)
+            target_reason = f"Zona Dorada Fib 0.618 (${fib_levels['0.618']:.2f})"
     else:
-        active_ob_count = len(active_obs)
-        active_fvg_count = len(active_fvgs)
-        rationale = f"Esperando confluencia en niveles clave. Monitorizando {active_ob_count} Order Blocks y {active_fvg_count} FVGs activos. Tendencia actual: {trend} (SMA20: ${sma20:.2f})."
+        bear_obs = [ob for ob in active_obs if ob["type"] == "BEARISH"]
+        bear_fvgs = [f for f in active_fvgs if f["type"] == "BEARISH"]
+        if bear_obs:
+            best_ob = min(bear_obs, key=lambda x: x["bottom"])
+            target_price = round(best_ob["bottom"], 2)
+            target_reason = f"Order Block Bajista (${best_ob['bottom']:.2f} - ${best_ob['top']:.2f})"
+        elif bear_fvgs:
+            best_fvg = min(bear_fvgs, key=lambda x: x["bottom"])
+            target_price = round(best_fvg["bottom"], 2)
+            target_reason = f"FVG Bajista (${best_fvg['bottom']:.2f} - ${best_fvg['top']:.2f})"
+        else:
+            target_price = round(fib_levels["0.618"], 2)
+            target_reason = f"Zona Dorada Fib 0.618 (${fib_levels['0.618']:.2f})"
+
+    dist_usd = round(abs(current_price - target_price), 2)
+    dist_pct = round((dist_usd / current_price) * 100, 2) if current_price > 0 else 0.0
+
+    pending_setup = {
+        "status": "WAITING_PRICE",
+        "target_price": target_price,
+        "target_action": target_action,
+        "target_type": target_type,
+        "target_strike": target_strike,
+        "current_sol": round(current_price, 2),
+        "distance_usd": dist_usd,
+        "distance_pct": dist_pct,
+        "zone_name": target_reason,
+        "confluence": confluence_score,
+        "min_confluence": 65,
+        "rationale": f"En espera de que SOL llegue a ${target_price:.2f} ({target_reason}) para comprar {target_type} Strike ${target_strike} con confluencia >= 65%."
+    }
+
+    # 7. Razón Explicativa en lenguaje humano
+    if signal == "BUY_PUT":
+        rationale = f"Confluencia Bajista ({confluence_score}%): {' + '.join(confluence_factors)}. Zona propicia para comprar opción PUT strike ${suggested_strike} esperando rechazo rápido."
+    elif signal == "BUY_CALL":
+        rationale = f"Confluencia Alcista ({confluence_score}%): {' + '.join(confluence_factors)}. Zona de soporte institucional para opción CALL strike ${suggested_strike} buscando impulso rápido."
+    else:
+        rationale = f"En espera del precio ${target_price:.2f} ({target_reason}). Distancia: ${dist_usd:.2f} ({dist_pct:.2f}%). Confluencia actual: {confluence_score}% / 65% requerido."
 
     return {
         "signal": signal,
@@ -220,7 +273,8 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
         "trend": trend,
         "sma20": round(sma20, 2),
         "suggested_strike": suggested_strike,
-        "suggested_type": suggested_type
+        "suggested_type": suggested_type,
+        "pending_setup": pending_setup
     }
 
 

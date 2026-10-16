@@ -159,31 +159,57 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
       <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-2.5 gap-2">
           <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-            <h2 class="text-sm font-bold text-white">Gráfico en Vivo (Velas 15M)</h2>
-            <span class="text-xs text-slate-400 font-mono">SOL/USDT</span>
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+              Centro de Operaciones
+            </h3>
+            <span id="operationsCountBadge" class="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800">0 operaciones</span>
           </div>
-          <div class="flex items-center gap-2 text-xs font-mono">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">■ Bullish OB</span>
-            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">■ Bearish OB</span>
-            <a href="/grafico" class="ml-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 transition flex items-center gap-1 shadow-sm">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-              <span>Ver con Dibujos SMC</span>
-            </a>
+
+          <!-- Filtros de pestañas -->
+          <div class="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-xl border border-slate-800 text-[11px] font-mono">
+            <button type="button" onclick="setOperationsFilter('all')" id="tabBtnAll" class="px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white transition shadow-sm">
+              Todas
+            </button>
+            <button type="button" onclick="setOperationsFilter('active')" id="tabBtnActive" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">
+              En Proceso (<span id="tabCountActive">0</span>)
+            </button>
+            <button type="button" onclick="setOperationsFilter('pending')" id="tabBtnPending" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">
+              En Espera (<span id="tabCountPending">0</span>)
+            </button>
+            <button type="button" onclick="setOperationsFilter('closed')" id="tabBtnClosed" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">
+              Culminadas (<span id="tabCountClosed">0</span>)
+            </button>
           </div>
         </div>
 
-        <div id="chartContainer" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-950/80 relative">
-          <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-xs text-slate-400">
-            Conectando con Binance WebSocket y cargando velas...
-          </div>
+        <div class="overflow-x-auto custom-scroll max-h-[300px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="text-[11px] text-slate-400 uppercase bg-slate-900/80 sticky top-0 border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-3">Estado</th>
+                <th class="py-2.5 px-3">Hora</th>
+                <th class="py-2.5 px-3">Tipo & Strike</th>
+                <th class="py-2.5 px-3">Lote</th>
+                <th class="py-2.5 px-3">Precio SOL (Ent/Obj/Sal)</th>
+                <th class="py-2.5 px-3">Prima</th>
+                <th class="py-2.5 px-3">Resultado / PnL</th>
+                <th class="py-2.5 px-3">Razón / Condición</th>
+                <th class="py-2.5 px-3">Modo / Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tradesTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td colspan="9" class="text-center py-6 text-slate-500 text-xs">Cargando operaciones...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="flex flex-col gap-4">
-        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
           <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
             <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
               <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
@@ -229,23 +255,66 @@
 
         <div id="activeTradeCard" class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30">
           <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Operación en Curso</span>
-            <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              CALL
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Monitor de Operaciones
+            </span>
+            <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              EN ESPERA
             </span>
           </div>
 
-          <div id="noActiveTradeMsg" class="py-6 text-center text-xs text-slate-400">
-            <span class="inline-block animate-pulse mb-1 text-slate-500 text-lg">📡</span>
-            <p>No hay operación abierta en este momento.</p>
-            <p class="text-[11px] text-slate-500 mt-1">El bot abrirá contrato automáticamente al confluir la señal.</p>
+          <!-- ESTADO 1: EN ESPERA DEL PRECIO X (ACECHANDO SETUP) -->
+          <div id="pendingTradeDetails" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-amber-400/90 font-mono font-semibold uppercase tracking-wider block">Acechando Entrada</span>
+                <div class="flex items-baseline gap-1.5 mt-0.5">
+                  <span class="text-xs text-slate-400">En espera del precio:</span>
+                  <span id="pendingTargetPrice" class="text-lg font-bold font-mono text-amber-300">$0.00</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block font-mono">Distancia a SOL:</span>
+                <span id="pendingDistance" class="text-xs font-mono font-bold text-slate-300">$0.00 (0.0%)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 font-mono">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Orden proyectada:</span>
+                <span id="pendingContractProjected" class="text-indigo-300 font-semibold text-[11px]">CALL Strike $0</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Confluencia actual:</span>
+                <span id="pendingConfluence" class="text-slate-200 font-semibold text-[11px]">0% / 65% req</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] p-2.5 rounded-xl bg-indigo-950/20 border border-indigo-900/40 text-slate-300 leading-relaxed font-mono">
+              <div class="flex items-start gap-1.5">
+                <span class="text-indigo-400 text-xs mt-0.5">🎯</span>
+                <div>
+                  <span class="text-indigo-300 font-bold">Nivel / Zona:</span>
+                  <span id="pendingZoneName" class="text-slate-300">Monitoreando Order Blocks y Fibonacci...</span>
+                  <p id="pendingRationale" class="text-slate-400 text-[10px] mt-1">El bot disparará la compra cuando SOL mitigue este nivel y la confluencia alcance ≥ 65%.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
+          <!-- ESTADO 2: OPERACIÓN EN CURSO EN PRECIO X -->
           <div id="activeTradeDetails" class="hidden flex flex-col gap-3">
             <div class="flex items-center justify-between">
               <div>
-                <div id="activeSymbol" class="text-sm font-bold text-white font-mono">SOL-P-100</div>
-                <div class="text-[11px] text-slate-400"><span id="activeContracts">5</span> contratos</div>
+                <div class="flex items-center gap-1.5">
+                  <span id="activeSymbol" class="text-sm font-bold text-white font-mono">SOL-C-184</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono"><span id="activeContracts">5</span> ctr</span>
+                </div>
+                <div class="text-[11px] text-emerald-400 font-mono font-medium mt-0.5">
+                  Iniciada en SOL: <strong id="activeEntrySolPrice" class="text-white font-bold">$0.00</strong>
+                </div>
               </div>
               <div class="text-right">
                 <div id="activeLivePnl" class="text-lg font-bold font-mono text-emerald-400">+$0.00</div>
@@ -269,11 +338,17 @@
               <span id="activeElapsedTimer" class="text-amber-400 font-bold">0m / 90m</span>
             </div>
 
-            <button onclick="closeActiveTradeManual()" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
+            <div class="text-[10px] p-2 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-400 font-mono leading-tight">
+              <span class="text-emerald-400 font-bold">Log Operación:</span>
+              <span id="activeTradeLog">Operación en curso iniciada en precio X.</span>
+            </div>
+
+            <button onclick="closeActiveTradeManual()" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               Cerrar Operación Inmediatamente
             </button>
           </div>
-        </div>
+        </div></div>
 
       </div>
     </div>
@@ -642,21 +717,26 @@
       }
 
       const active = state.active_trade;
-      const noTrade = document.getElementById('noActiveTradeMsg');
+      const pending = state.pending_setup;
+      const pendingDetails = document.getElementById('pendingTradeDetails');
       const tradeDetails = document.getElementById('activeTradeDetails');
+      const typeBadge = document.getElementById('activeTradeTypeBadge');
 
       if (active) {
-        noTrade.classList.add('hidden');
-        tradeDetails.classList.remove('hidden');
+        if (pendingDetails) pendingDetails.classList.add('hidden');
+        if (tradeDetails) tradeDetails.classList.remove('hidden');
 
-        const typeBadge = document.getElementById('activeTradeTypeBadge');
-        typeBadge.innerText = active.option_type;
-        typeBadge.className = active.option_type === 'CALL'
-          ? 'text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-          : 'text-xs font-bold font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        if (typeBadge) {
+          typeBadge.className = active.option_type === 'CALL'
+            ? 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1'
+            : 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1';
+          typeBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${active.option_type === 'CALL' ? 'bg-emerald-400' : 'bg-rose-400'} animate-ping"></span> EN CURSO (${active.option_type})`;
+        }
 
         document.getElementById('activeSymbol').innerText = active.symbol;
         document.getElementById('activeContracts').innerText = active.contracts;
+        const entrySol = active.entry_sol_price ? active.entry_sol_price.toFixed(2) : (state.sol_price ? state.sol_price.toFixed(2) : '0.00');
+        document.getElementById('activeEntrySolPrice').innerText = `$${entrySol}`;
         document.getElementById('activeEntryPremium').innerText = `$${active.entry_premium.toFixed(2)}`;
         document.getElementById('activeCurrentPremium').innerText = `$${active.current_premium.toFixed(2)}`;
 
@@ -673,10 +753,38 @@
         livePnlPctEl.className = `text-xs font-mono font-semibold ${colorClass}`;
 
         document.getElementById('activeElapsedTimer').innerText = `${active.elapsed_minutes}m / ${active.max_minutes}m`;
+        const logEl = document.getElementById('activeTradeLog');
+        if (logEl) logEl.innerText = active.log || `Operación en curso iniciada en SOL $${entrySol}.`;
       } else {
-        noTrade.classList.remove('hidden');
-        tradeDetails.classList.add('hidden');
+        if (tradeDetails) tradeDetails.classList.add('hidden');
+        if (pendingDetails) pendingDetails.classList.remove('hidden');
+
+        if (typeBadge) {
+          typeBadge.className = 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1';
+          typeBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> EN ESPERA';
+        }
+
+        if (pending) {
+          const targetPriceEl = document.getElementById('pendingTargetPrice');
+          if (targetPriceEl) targetPriceEl.innerText = `$${pending.target_price.toFixed(2)}`;
+          const distSign = (state.sol_price && pending.target_price >= state.sol_price) ? '+' : '-';
+          const distEl = document.getElementById('pendingDistance');
+          if (distEl) distEl.innerText = `${distSign}$${pending.distance_usd.toFixed(2)} (${pending.distance_pct.toFixed(2)}%)`;
+          const projEl = document.getElementById('pendingContractProjected');
+          if (projEl) projEl.innerText = `${pending.target_type} Strike $${pending.target_strike}`;
+          const confEl = document.getElementById('pendingConfluence');
+          if (confEl) confEl.innerText = `${pending.confluence}% / ${pending.min_confluence}% req`;
+          const zoneEl = document.getElementById('pendingZoneName');
+          if (zoneEl) zoneEl.innerText = pending.zone_name || 'Zona Institucional SMC';
+          const ratEl = document.getElementById('pendingRationale');
+          if (ratEl) ratEl.innerText = pending.rationale || 'El bot entrará automáticamente cuando SOL mitigue este nivel.';
+        }
       }
+
+      if (state.recent_trades) {
+        cachedClosedTrades = state.recent_trades;
+      }
+      renderOperationsTable();
 
       if (state.recent_logs) {
         renderTerminalLogs(state.recent_logs);
@@ -685,6 +793,7 @@
 
     function renderTerminalLogs(logs) {
       const term = document.getElementById('terminalLog');
+      if (!term) return;
       term.innerHTML = '';
       logs.forEach(l => {
         const div = document.createElement('div');
@@ -700,87 +809,191 @@
       term.scrollTop = term.scrollHeight;
     }
 
+    let currentFilter = 'all';
+    let cachedClosedTrades = [];
+
+    function setOperationsFilter(filter) {
+      currentFilter = filter;
+      ['all', 'active', 'pending', 'closed'].forEach(f => {
+        const btn = document.getElementById('tabBtn' + f.charAt(0).toUpperCase() + f.slice(1));
+        if (btn) {
+          if (f === filter) {
+            btn.className = 'px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white transition shadow-sm';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+          }
+        }
+      });
+      renderOperationsTable();
+    }
+
+    function renderOperationsTable() {
+      const tbody = document.getElementById('tradesTableBody');
+      if (!tbody) return;
+
+      const active = currentBotState ? currentBotState.active_trade : null;
+      const pending = currentBotState ? currentBotState.pending_setup : null;
+      const closed = cachedClosedTrades || [];
+
+      // Contadores
+      const countActive = active ? 1 : 0;
+      const countPending = (pending && !active) ? 1 : 0;
+      const countClosed = closed.length;
+      const countTotal = countActive + countPending + countClosed;
+
+      if (document.getElementById('tabCountActive')) document.getElementById('tabCountActive').innerText = countActive;
+      if (document.getElementById('tabCountPending')) document.getElementById('tabCountPending').innerText = countPending;
+      if (document.getElementById('tabCountClosed')) document.getElementById('tabCountClosed').innerText = countClosed;
+      if (document.getElementById('operationsCountBadge')) document.getElementById('operationsCountBadge').innerText = `${countTotal} operaciones`;
+
+      let rowsHtml = '';
+      let renderedRows = 0;
+
+      // 1. FILA DE OPERACIÓN EN PROCESO
+      if (active && (currentFilter === 'all' || currentFilter === 'active')) {
+        renderedRows++;
+        const pnl = active.unrealized_pnl_usd;
+        const pnlPct = active.unrealized_pnl_pct;
+        const sign = pnl >= 0 ? '+' : '';
+        const pnlColor = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
+        const entrySol = active.entry_sol_price ? active.entry_sol_price.toFixed(2) : '-';
+        const curSol = active.current_sol ? active.current_sol.toFixed(2) : '-';
+        const timeStr = active.entry_time ? active.entry_time.split('T')[1].substring(0, 8) : 'En vivo';
+
+        rowsHtml += `
+          <tr class="bg-indigo-950/30 border-l-4 border-emerald-400 hover:bg-indigo-950/50 transition">
+            <td class="py-2.5 px-3">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                EN PROCESO
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-300">${timeStr}</td>
+            <td class="py-2.5 px-3">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${active.option_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}">${active.option_type}</span>
+              <span class="text-white font-semibold ml-1">$${active.strike}</span>
+            </td>
+            <td class="py-2.5 px-3">${active.contracts}</td>
+            <td class="py-2.5 px-3">
+              <span class="text-slate-300">Entrada: <strong>$${entrySol}</strong></span>
+              <span class="text-slate-500 block text-[10px]">SOL Actual: $${curSol}</span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-300 font-medium">
+              $${active.entry_premium.toFixed(2)} → <span class="text-emerald-300">$${active.current_premium.toFixed(2)}</span>
+            </td>
+            <td class="py-2.5 px-3 font-bold ${pnlColor}">
+              ${sign}$${pnl.toFixed(2)} (${sign}${pnlPct.toFixed(1)}%)
+            </td>
+            <td class="py-2.5 px-3 text-slate-400 text-[11px]">
+              <span class="text-amber-400 font-semibold">${active.elapsed_minutes}m/90m</span>
+              <span class="text-slate-500 block text-[10px]">TP +75% / SL -35%</span>
+            </td>
+            <td class="py-2.5 px-3">
+              <button onclick="closeActiveTradeManual()" class="px-2 py-0.5 rounded bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 text-[10px] font-semibold transition">
+                Cerrar
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      // 2. FILA DE SETUP EN ESPERA / ACECHANDO
+      if (pending && !active && (currentFilter === 'all' || currentFilter === 'pending')) {
+        renderedRows++;
+        rowsHtml += `
+          <tr class="bg-amber-950/20 border-l-4 border-amber-400 hover:bg-amber-950/30 transition">
+            <td class="py-2.5 px-3">
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                EN ESPERA
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-400">Radar 15m</td>
+            <td class="py-2.5 px-3">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${pending.target_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}">${pending.target_type}</span>
+              <span class="text-white font-semibold ml-1">$${pending.target_strike}</span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-400">5 ctr</td>
+            <td class="py-2.5 px-3">
+              <span class="text-amber-300 font-bold">Obj: $${pending.target_price.toFixed(2)}</span>
+              <span class="text-slate-500 block text-[10px]">Dist: $${pending.distance_usd.toFixed(2)} (${pending.distance_pct.toFixed(2)}%)</span>
+            </td>
+            <td class="py-2.5 px-3 text-slate-400">Est. ~$1.80</td>
+            <td class="py-2.5 px-3 text-indigo-300 font-semibold">
+              Confl: ${pending.confluence}% / 65%
+            </td>
+            <td class="py-2.5 px-3 text-slate-400 text-[11px]">
+              ${pending.zone_name || 'Zona Institucional SMC'}
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px]">Acechando</span>
+            </td>
+          </tr>
+        `;
+      }
+
+      // 3. FILAS DE OPERACIONES CULMINADAS
+      if (currentFilter === 'all' || currentFilter === 'closed') {
+        closed.forEach(t => {
+          renderedRows++;
+          const sign = t.pnl_usd >= 0 ? '+' : '';
+          const pnlColor = t.pnl_usd >= 0 ? 'text-emerald-400' : 'text-rose-400';
+          const typeColor = t.option_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
+          const timeStr = t.exit_time ? t.exit_time.split('T')[1].substring(0, 8) : (t.entry_time ? t.entry_time.split('T')[1].substring(0, 8) : '--:--:--');
+          const entrySol = t.entry_sol_price ? `$${t.entry_sol_price.toFixed(2)}` : '-';
+          const exitSol = t.exit_sol_price ? `$${t.exit_sol_price.toFixed(2)}` : '-';
+
+          rowsHtml += `
+            <tr class="hover:bg-slate-800/30 transition border-l-4 border-transparent">
+              <td class="py-2.5 px-3">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                  CULMINADA
+                </span>
+              </td>
+              <td class="py-2.5 px-3 text-slate-400">${timeStr}</td>
+              <td class="py-2.5 px-3">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${typeColor}">${t.option_type}</span>
+                <span class="text-white font-semibold ml-1">$${t.strike}</span>
+              </td>
+              <td class="py-2.5 px-3">${t.contracts}</td>
+              <td class="py-2.5 px-3 text-slate-400 text-[11px]">
+                ${entrySol} → <strong class="text-slate-200">${exitSol}</strong>
+              </td>
+              <td class="py-2.5 px-3 text-slate-400">
+                $${t.entry_premium.toFixed(2)} → $${t.exit_premium ? t.exit_premium.toFixed(2) : '-'}
+              </td>
+              <td class="py-2.5 px-3 font-bold ${pnlColor}">
+                ${sign}$${t.pnl_usd ? t.pnl_usd.toFixed(2) : '0.00'} (${sign}${t.pnl_pct ? t.pnl_pct.toFixed(1) : '0'}%)
+              </td>
+              <td class="py-2.5 px-3 text-slate-400 text-[11px]">${t.exit_reason || '-'}</td>
+              <td class="py-2.5 px-3 text-slate-400">${t.is_paper ? 'Paper' : 'Real'}</td>
+            </tr>
+          `;
+        });
+      }
+
+      if (renderedRows === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500 text-xs">No hay operaciones para este filtro.</td></tr>';
+      } else {
+        tbody.innerHTML = rowsHtml;
+      }
+    }
+
     async function loadTradeHistory() {
       try {
         const res = await fetch('/api/history');
         if (res.ok) {
-          const trades = await res.json();
-          const tbody = document.getElementById('tradesTableBody');
-          if (trades.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td></tr>';
-            return;
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            cachedClosedTrades = data;
+          } else if (data && data.trades) {
+            cachedClosedTrades = data.trades;
           }
-          tbody.innerHTML = '';
-          trades.forEach(t => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-slate-800/30 transition';
-            const sign = t.pnl_usd >= 0 ? '+' : '';
-            const pnlColor = t.pnl_usd >= 0 ? 'text-emerald-400' : 'text-rose-400';
-            const typeColor = t.option_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
-
-            const timeStr = t.exit_time ? t.exit_time.split('T')[1].substring(0, 8) : '--:--:--';
-
-            tr.innerHTML = `
-              <td class="py-2.5 px-3 text-slate-400">${timeStr}</td>
-              <td class="py-2.5 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${typeColor}">${t.option_type}</span></td>
-              <td class="py-2.5 px-3 font-semibold text-white">$${t.strike}</td>
-              <td class="py-2.5 px-3">${t.contracts}</td>
-              <td class="py-2.5 px-3 text-slate-400">$${t.entry_premium.toFixed(2)} → $${t.exit_premium ? t.exit_premium.toFixed(2) : '-'}</td>
-              <td class="py-2.5 px-3 font-bold ${pnlColor}">${sign}$${t.pnl_usd ? t.pnl_usd.toFixed(2) : '0.00'} (${sign}${t.pnl_pct ? t.pnl_pct.toFixed(1) : '0'}%)</td>
-              <td class="py-2.5 px-3 text-slate-400">${t.exit_reason || '-'}</td>
-              <td class="py-2.5 px-3">${t.is_paper ? '<span class="text-sky-400">Paper</span>' : '<span class="text-rose-400">Real</span>'}</td>
-            `;
-            tbody.appendChild(tr);
-          });
+          renderOperationsTable();
         }
       } catch (e) {
-        console.error('Error cargando historial:', e);
+        console.error('Error cargando operaciones:', e);
       }
-    }
-
-    async function toggleTradingMode() {
-      const newMode = !isPaperMode;
-      const res = await fetch('/api/control/mode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paper: newMode })
-      });
-      if (res.ok) {
-        loadTradeHistory();
-      }
-    }
-
-    async function toggleBotPause() {
-      await fetch('/api/control/toggle', { method: 'POST' });
-    }
-
-    async function closeActiveTradeManual() {
-      if (confirm('¿Deseas cerrar inmediatamente la posición abierta a precio de mercado?')) {
-        await fetch('/api/control/close_active', { method: 'POST' });
-        loadTradeHistory();
-      }
-    }
-
-    function toggleApiGuide() {
-      const content = document.getElementById('apiGuideContent');
-      const arrow = document.getElementById('apiGuideArrow');
-      if (content.classList.contains('hidden')) {
-        content.classList.remove('hidden');
-        arrow.innerText = '▲';
-      } else {
-        content.classList.add('hidden');
-        arrow.innerText = '▼';
-      }
-    }
-
-    function copyIpToClipboard() {
-      const ipEl = document.getElementById('displayVpsIp');
-      const btn = document.getElementById('btnCopyIp');
-      const ip = ipEl ? ipEl.innerText.trim() : window.location.hostname;
-      navigator.clipboard.writeText(ip).then(() => {
-        btn.innerText = '¡Copiado! ✓';
-        setTimeout(() => { btn.innerText = 'Copiar IP 📋'; }, 2000);
-      });
     }
 
     function openConfigModal() {
