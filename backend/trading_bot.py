@@ -262,6 +262,7 @@ class TradingBot:
             "analysis": self.current_analysis,
             "active_trade": active_info,
             "pending_setup": pending_setup,
+            "trading_setups": self.current_analysis.get("trading_setups") if self.current_analysis else None,
             "recent_trades": get_trades_history(50),
             "stats": stats,
             "settings": {

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis de Trading (Spot & Futuros) | SMC Pro SOL/USDT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body { background-color: #080B11; color: #E2E8F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.45); }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white pb-10">
+
+  <!-- Header Superior -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Navegación y Título -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="/grafico" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          <span>Gráfico Solo</span>
+        </a>
+
+        <div class="h-5 w-[1px] bg-slate-800 hidden sm:block"></div>
+
+        <div>
+          <h1 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+            📊 Centro de Análisis de Trading
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Spot & Futuros USD-M</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Gráfico institucional SMC con recomendaciones automáticas de Entrada, Stop Loss y Take Profit</p>
+        </div>
+      </div>
+
+      <!-- Ticker y Status en Vivo -->
+      <div class="flex items-center gap-3 font-mono">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400" id="wsStatusDot" title="Binance WebSocket Conectado"></span>
+          <span class="font-bold text-base text-white" id="solPrice">$0.00</span>
+          <span class="text-xs font-semibold text-emerald-400" id="solChange">+0.00%</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5 w-full">
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 w-full items-start">
+      
+      <!-- COLUMNA IZQUIERDA: EL GRÁFICO SMC PRO (8 COLS) -->
+      <div class="xl:col-span-8 flex flex-col gap-3">
+        
+        <!-- Barra de Herramientas de Capas Visuales SMC -->
+        <div class="glass-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+            Capas SMC en el Gráfico:
+          </span>
+
+          <div class="flex items-center flex-wrap gap-1.5 text-xs font-mono">
+            <button id="btnLayerOB" onclick="toggleLayer('orderBlocks')" class="px-2.5 py-1 rounded-lg font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>Order Blocks</span>
+            </button>
+
+            <button id="btnLayerFVG" onclick="toggleLayer('fvgs')" class="px-2.5 py-1 rounded-lg font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span>FVGs</span>
+            </button>
+
+            <button id="btnLayerFib" onclick="toggleLayer('fib')" class="px-2.5 py-1 rounded-lg font-semibold bg-amber-950/70 text-amber-300 border border-amber-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>Fib 0.618</span>
+            </button>
+
+            <button id="btnLayerTrend" onclick="toggleLayer('trend')" class="px-2.5 py-1 rounded-lg font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+              <span>SMA 20</span>
+            </button>
+
+            <button id="btnLayerBoxes" onclick="toggleLayer('boxes')" class="px-2.5 py-1 rounded-lg font-semibold bg-violet-950/70 text-violet-300 border border-violet-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-violet-400"></span>
+              <span>Cajas Sombreadas</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenedor del Gráfico con Overlay Dibujado -->
+        <div id="chartContainerWrapper" class="w-full h-[620px] rounded-2xl overflow-hidden bg-slate-950/90 relative border border-slate-800/80 shadow-2xl">
+          <div id="chartContainer" class="w-full h-full relative">
+            <canvas id="smcOverlayCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+            
+            <!-- HUD Flotante en el Gráfico -->
+            <div id="chartFloatingHUD" class="absolute top-3 left-3 z-20 glass-panel px-3.5 py-2 rounded-xl text-xs font-mono pointer-events-none border border-slate-700/60 flex items-center gap-3 shadow-xl">
+              <span class="text-white font-bold" id="hudSolPrice">$0.00</span>
+              <span class="text-slate-500">|</span>
+              <span id="hudTrendBadge" class="text-emerald-400 font-semibold">TREND: BULLISH</span>
+              <span class="text-slate-500">|</span>
+              <span class="text-indigo-300">Confluencia: <strong id="hudConfidence">0%</strong></span>
+              <span class="text-slate-500">|</span>
+              <span class="text-slate-400">SMA20: <strong id="hudSma20" class="text-white">$0.00</strong></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMNA DERECHA: LOS 2 PANELES (SPOT Y FUTUROS) (4 COLS) -->
+      <div class="xl:col-span-4 flex flex-col gap-4">
+        
+        <!-- PANEL 1: SPOT TRADING (INVERSIÓN / SWINGS) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-emerald-500/30 shadow-xl relative overflow-hidden">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs shadow-sm">
+                🟢
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Trading Spot</h3>
+                <span class="text-[10px] text-slate-400 font-mono">Inversión / Compras al Contado</span>
+              </div>
+            </div>
+            <span id="spotStatusBadge" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              ZONA DE COMPRA
+            </span>
+          </div>
+
+          <!-- Precios de Entrada Sugeridos -->
+          <div class="flex flex-col gap-1.5">
+            <span class="text-[10px] text-slate-400 font-mono font-semibold uppercase tracking-wider">Precios de Entrada Sugeridos</span>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/30">
+                <span class="text-[10px] text-emerald-400 block font-semibold">1. Entrada Óptima:</span>
+                <span id="spotEntryOpt" class="text-base font-bold text-white mt-0.5 block">$0.00</span>
+                <span class="text-[9px] text-slate-400 block mt-0.5">Order Block / Fib 0.618</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[10px] text-slate-300 block font-semibold">2. Entrada DCA:</span>
+                <span id="spotEntrySec" class="text-base font-bold text-slate-200 mt-0.5 block">$0.00</span>
+                <span class="text-[9px] text-slate-500 block mt-0.5">Toque FVG / Descuento</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stop Loss Recomendado -->
+          <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-500/30 text-xs font-mono flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-rose-300 font-semibold block uppercase">Stop Loss Recomendado (SL):</span>
+              <span id="spotStopLoss" class="text-sm font-bold text-rose-400">$0.00</span>
+              <span class="text-[9px] text-slate-400 block mt-0.5">Debajo de invalidación 15m</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Distancia SL:</span>
+              <span id="spotSlDist" class="text-xs font-bold text-rose-300">-$0.00 (-0.0%)</span>
+            </div>
+          </div>
+
+          <!-- Take Profits Recomendados -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-mono font-semibold uppercase tracking-wider">Take Profits Recomendados</span>
+              <span class="text-[10px] font-mono text-emerald-400 font-bold" id="spotRatioRR">R:R 1:2.8</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-1.5 text-xs font-mono text-center">
+              <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">TP1</span>
+                <span id="spotTp1" class="text-xs font-bold text-emerald-400 mt-0.5 block">$0.00</span>
+                <span id="spotTp1Pct" class="text-[9px] text-emerald-400/80 font-semibold block">+0.0%</span>
+              </div>
+              <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">TP2</span>
+                <span id="spotTp2" class="text-xs font-bold text-emerald-400 mt-0.5 block">$0.00</span>
+                <span id="spotTp2Pct" class="text-[9px] text-emerald-400/80 font-semibold block">+0.0%</span>
+              </div>
+              <div class="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[9px] text-slate-400 block">TP3</span>
+                <span id="spotTp3" class="text-xs font-bold text-emerald-400 mt-0.5 block">$0.00</span>
+                <span id="spotTp3Pct" class="text-[9px] text-emerald-400/80 font-semibold block">+0.0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nota de Gestión Spot -->
+          <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] text-slate-400 font-mono leading-relaxed">
+            <span class="text-emerald-400 font-bold block mb-0.5">🛡️ Estrategia Spot:</span>
+            <span id="spotAllocationTip">Sin liquidación. Asignación sugerida 5% a 10% del capital. Compras escalonadas (60% en Entrada 1, 40% en Entrada 2).</span>
+          </div>
+        </div>
+
+        <!-- PANEL 2: FUTUROS USD-M (LONG / SHORT CON APALANCAMIENTO) -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30 shadow-xl relative overflow-hidden">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 font-bold text-xs shadow-sm">
+                ⚡
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider">Trading Futuros</h3>
+                <span class="text-[10px] text-slate-400 font-mono">Derivados USD-M / Long & Short</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 font-mono">
+              <span id="futDirBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
+                LONG
+              </span>
+              <span id="futLevBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                5x - 10x
+              </span>
+            </div>
+          </div>
+
+          <!-- Precio de Entrada Trigger -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-mono font-semibold uppercase tracking-wider">Entrada Trigger / Limit</span>
+              <span id="futEntryDist" class="text-[10px] font-mono text-indigo-300">Dist: $0.00 (0.0%)</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-indigo-500/30 flex items-center justify-between font-mono">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Entrada Confirmada:</span>
+                <span id="futEntryPrice" class="text-base font-bold text-indigo-300">$0.00</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block">Tipo de Orden:</span>
+                <span class="text-xs font-semibold text-slate-200">Limit en OB / FVG</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stop Loss Estricto -->
+          <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-500/30 text-xs font-mono flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-rose-300 font-semibold block uppercase">Stop Loss Estricto (SL):</span>
+              <span id="futStopLoss" class="text-sm font-bold text-rose-400">$0.00</span>
+              <span class="text-[9px] text-slate-400 block mt-0.5">Corte técnico por invalidación</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Riesgo Subyacente:</span>
+              <span id="futSlDist" class="text-xs font-bold text-rose-300">-$0.00 (-0.0%)</span>
+              <span id="futSlDist10x" class="text-[9px] text-rose-400/90 block font-semibold">-0.0% con 10x</span>
+            </div>
+          </div>
+
+          <!-- Take Profits Escalonados -->
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-mono font-semibold uppercase tracking-wider">Take Profits Escalonados</span>
+              <span class="text-[10px] font-mono text-indigo-300 font-bold">Ratio R:R 1:3.0</span>
+            </div>
+
+            <div class="flex flex-col gap-1.5 text-xs font-mono">
+              <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">TP1 (50%)</span>
+                  <span id="futTp1" class="text-xs font-bold text-white">$0.00</span>
+                  <span id="futTp1Pct" class="text-[9px] text-emerald-400 font-semibold">+0.0%</span>
+                </div>
+                <span class="text-[9px] text-slate-400">SL a Breakeven</span>
+              </div>
+
+              <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">TP2 (30%)</span>
+                  <span id="futTp2" class="text-xs font-bold text-white">$0.00</span>
+                  <span id="futTp2Pct" class="text-[9px] text-emerald-400 font-semibold">+0.0%</span>
+                </div>
+                <span class="text-[9px] text-slate-400">Toma de ganancias</span>
+              </div>
+
+              <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">TP3 (20%)</span>
+                  <span id="futTp3" class="text-xs font-bold text-white">$0.00</span>
+                  <span id="futTp3Pct" class="text-[9px] text-emerald-400 font-semibold">+0.0%</span>
+                </div>
+                <span class="text-[9px] text-slate-400">Trailing Stop</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estimación de Liquidación -->
+          <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[10px] text-slate-400 font-mono leading-relaxed flex flex-col gap-0.5">
+            <div class="flex items-center justify-between text-slate-300">
+              <span>⚠️ Liq. (10x): <strong id="futLiq10x" class="text-amber-300 font-bold">$0.00</strong></span>
+              <span>Liq. (5x): <strong id="futLiq5x" class="text-slate-300">$0.00</strong></span>
+            </div>
+            <p class="text-slate-500 text-[9px]">Margen Aislado obligatorio. Máximo 1% a 2% de riesgo por trade.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Tablas de Datos Institucionales de SMC -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+      <!-- Order Blocks -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          Order Blocks Institucionales (OB)
+        </h4>
+        <div id="tableOrderBlocks" class="text-xs font-mono flex flex-col gap-1.5 max-h-[160px] overflow-y-auto custom-scroll text-slate-300">
+          <div class="text-slate-500 text-[11px]">Cargando Order Blocks...</div>
+        </div>
+      </div>
+
+      <!-- FVGs -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          Fair Value Gaps Activos (FVG)
+        </h4>
+        <div id="tableFVGs" class="text-xs font-mono flex flex-col gap-1.5 max-h-[160px] overflow-y-auto custom-scroll text-slate-300">
+          <div class="text-slate-500 text-[11px]">Cargando Fair Value Gaps...</div>
+        </div>
+      </div>
+
+      <!-- Fibonacci -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Niveles Fibonacci Estructurales
+        </h4>
+        <div id="tableFibLevels" class="text-xs font-mono flex flex-col gap-1.5 max-h-[160px] overflow-y-auto custom-scroll text-slate-300">
+          <div class="text-slate-500 text-[11px]">Cargando niveles Fibonacci...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+
+    let chart, candleSeries, smaSeries;
+    let ws = null;
+    let currentKlines = [];
+    let currentAnalysis = null;
+    let activePriceLines = [];
+
+    const layerOptions = {
+      orderBlocks: true,
+      fvgs: true,
+      fibonacci: true,
+      sma: true,
+      zones: true
+    };
+
+    function initChart() {
+      const container = document.getElementById('chartContainer');
+      chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        layout: {
+          background: { color: '#090D16' },
+          textColor: '#94A3B8',
+          fontSize: 11,
+          fontFamily: '"JetBrains Mono", monospace'
+        },
+        grid: {
+          vertLines: { color: 'rgba(30, 41, 59, 0.45)' },
+          horzLines: { color: 'rgba(30, 41, 59, 0.45)' }
+        },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.6)' },
+        timeScale: { borderColor: 'rgba(51, 65, 85, 0.6)', timeVisible: true, secondsVisible: false }
+      });
+
+      candleSeries = chart.addCandlestickSeries({
+        upColor: '#10B981',
+        downColor: '#F43F5E',
+        borderUpColor: '#10B981',
+        borderDownColor: '#F43F5E',
+        wickUpColor: '#10B981',
+        wickDownColor: '#F43F5E'
+      });
+
+      smaSeries = chart.addLineSeries({
+        color: '#10B981',
+        lineWidth: 2,
+        priceLineVisible: false,
+        crosshairMarkerVisible: false,
+        title: 'SMA 20'
+      });
+
+      chart.timeScale().subscribeVisibleTimeRangeChange(() => { drawSMCOverlayCanvas(); });
+      chart.timeScale().subscribeVisibleLogicalRangeChange(() => { drawSMCOverlayCanvas(); });
+
+      window.addEventListener('resize', () => {
+        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+        drawSMCOverlayCanvas();
+      });
+
+      loadKlines();
+    }
+
+    function toggleLayer(layerName) {
+      layerOptions[layerName] = !layerOptions[layerName];
+      const btnMap = {
+        orderBlocks: 'btnLayerOB',
+        fvgs: 'btnLayerFVG',
+        fibonacci: 'btnLayerFib',
+        sma: 'btnLayerSMA',
+        zones: 'btnLayerZones'
+      };
+      const btn = document.getElementById(btnMap[layerName]);
+      if (btn) {
+        if (layerOptions[layerName]) {
+          btn.classList.remove('opacity-40', 'line-through');
+        } else {
+          btn.classList.add('opacity-40', 'line-through');
+        }
+      }
+      if (currentAnalysis) {
+        drawSMCIndicators(currentAnalysis);
+      }
+    }
+
+    async function loadKlines() {
+      try {
+        const res = await fetch('/api/klines');
+        if (res.ok) {
+          const klines = await res.json();
+          if (klines && klines.length > 0) {
+            currentKlines = klines;
+            candleSeries.setData(klines);
+            updateSMA(klines);
+            document.getElementById('chartLoading').classList.add('hidden');
+            chart.timeScale().fitContent();
+          }
+        }
+      } catch (e) {
+        console.error('Error cargando klines:', e);
+      }
+    }
+
+    function calculateSMA(klines, period = 20) {
+      const result = [];
+      for (let i = period - 1; i < klines.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+          sum += klines[i - j].close;
+        }
+        result.push({ time: klines[i].time, value: sum / period });
+      }
+      return result;
+    }
+
+    function updateSMA(klines) {
+      if (layerOptions.sma && klines.length >= 20) {
+        const smaData = calculateSMA(klines, 20);
+        smaSeries.setData(smaData);
+      } else {
+        smaSeries.setData([]);
+      }
+    }
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+      };
+
+      ws.onmessage = (event) => {
+        const state = JSON.parse(event.data);
+        handleStateUpdate(state);
+      };
+
+      ws.onclose = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-rose-400 animate-ping';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = () => { ws.close(); };
+    }
+
+    function handleStateUpdate(state) {
+      if (candleSeries && state.sol_price > 0 && currentKlines.length > 0) {
+        const last = { ...currentKlines[currentKlines.length - 1] };
+        last.close = state.sol_price;
+        if (state.sol_price > last.high) last.high = state.sol_price;
+        if (state.sol_price < last.low) last.low = state.sol_price;
+        candleSeries.update(last);
+      }
+
+      const pStr = `$${state.sol_price.toFixed(2)}`;
+      document.getElementById('solPrice').innerText = pStr;
+      document.getElementById('hudSolPrice').innerText = pStr;
+
+      const chg = state.price_change_24h;
+      const chgStr = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
+      const chgEl = document.getElementById('solChange');
+      chgEl.innerText = chgStr;
+      chgEl.className = chg >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+
+      const ans = state.analysis;
+      currentAnalysis = ans;
+
+      const isBull = ans.trend === 'BULLISH';
+      const trendBadge = document.getElementById('trendBadge');
+      trendBadge.innerText = ans.trend;
+      trendBadge.className = isBull 
+        ? 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold'
+        : 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold';
+
+      const hudTrend = document.getElementById('hudTrendBadge');
+      hudTrend.innerText = `TREND: ${ans.trend}`;
+      hudTrend.className = isBull ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+
+      document.getElementById('confluenceBadge').innerText = `${ans.confidence}% Confluencia`;
+      document.getElementById('hudConfluenceBadge').innerText = `SMC: ${ans.confidence}%`;
+
+      drawSMCIndicators(ans);
+    }
+
+    function drawSMCIndicators(analysis) {
+      if (!analysis || !candleSeries) return;
+
+      activePriceLines.forEach(pl => {
+        try { candleSeries.removePriceLine(pl); } catch (e) {}
+      });
+      activePriceLines = [];
+
+      const markers = [];
+
+      if (layerOptions.fibonacci && analysis.fib_levels) {
+        const fib = analysis.fib_levels;
+        if (fib['0.618']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.618'],
+            color: '#F59E0B',
+            lineWidth: 2,
+            lineStyle: 0,
+            axisLabelVisible: true,
+            title: '★ Fib 0.618 (Golden Pocket)'
+          }));
+        }
+        if (fib['0.705']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.705'],
+            color: '#D97706',
+            lineWidth: 1,
+            lineStyle: 2,
+            axisLabelVisible: true,
+            title: 'Fib 0.705 (OTE)'
+          }));
+        }
+        if (fib['0.50']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.50'],
+            color: '#64748B',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Fib 0.50 (Equilibrio)'
+          }));
+        }
+        if (fib['1.0']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['1.0'],
+            color: '#475569',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Swing High (1.0)'
+          }));
+        }
+        if (fib['0.0']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.0'],
+            color: '#475569',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Swing Low (0.0)'
+          }));
+        }
+      }
+
+      if (layerOptions.orderBlocks && analysis.order_blocks) {
+        analysis.order_blocks.forEach((ob, idx) => {
+          if (ob.type === 'BULLISH') {
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.top,
+              color: '#10B981',
+              lineWidth: 1.5,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `OB Bullish #${idx+1} Top`
+            }));
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.bottom,
+              color: '#059669',
+              lineWidth: 1,
+              lineStyle: 2,
+              axisLabelVisible: true,
+              title: `OB Bullish Base`
+            }));
+            if (ob.time) {
+              markers.push({
+                time: ob.time,
+                position: 'belowBar',
+                color: '#10B981',
+                shape: 'arrowUp',
+                text: 'OB Alcista'
+              });
+            }
+          } else {
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.top,
+              color: '#E11D48',
+              lineWidth: 1,
+              lineStyle: 2,
+              axisLabelVisible: true,
+              title: `OB Bearish Top`
+            }));
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.bottom,
+              color: '#F43F5E',
+              lineWidth: 1.5,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `OB Bearish #${idx+1} Base`
+            }));
+            if (ob.time) {
+              markers.push({
+                time: ob.time,
+                position: 'aboveBar',
+                color: '#F43F5E',
+                shape: 'arrowDown',
+                text: 'OB Bajista'
+              });
+            }
+          }
+        });
+      }
+
+      if (layerOptions.fvgs && analysis.fvgs) {
+        analysis.fvgs.forEach((fvg) => {
+          if (fvg.time) {
+            markers.push({
+              time: fvg.time,
+              position: fvg.type === 'BULLISH' ? 'belowBar' : 'aboveBar',
+              color: fvg.type === 'BULLISH' ? '#06B6D4' : '#F97316',
+              shape: 'circle',
+              text: `FVG ${fvg.type === 'BULLISH' ? 'Alcista' : 'Bajista'}`
+            });
+          }
+        });
+      }
+
+      markers.sort((a, b) => a.time - b.time);
+      candleSeries.setMarkers(markers);
+
+      if (analysis.trend) {
+        smaSeries.applyOptions({
+          color: analysis.trend === 'BULLISH' ? '#10B981' : '#F43F5E'
+        });
+      }
+
+      drawSMCOverlayCanvas();
+      updateDataTables(analysis);
+    }
+
+    function drawSMCOverlayCanvas() {
+      const canvas = document.getElementById('smcOverlayCanvas');
+      if (!canvas || !chart || !candleSeries || !currentAnalysis) return;
+
+      const container = document.getElementById('chartContainer');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w === 0 || h === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      if (!layerOptions.zones) return;
+
+      const timeScale = chart.timeScale();
+      const plotWidth = timeScale.width();
+      const ans = currentAnalysis;
+
+      if (layerOptions.fibonacci && ans.fib_levels && ans.fib_levels['0.618'] && ans.fib_levels['0.705']) {
+        const y618 = candleSeries.priceToCoordinate(ans.fib_levels['0.618']);
+        const y705 = candleSeries.priceToCoordinate(ans.fib_levels['0.705']);
+        if (y618 !== null && y705 !== null) {
+          const y = Math.min(y618, y705);
+          const boxH = Math.max(Math.abs(y705 - y618), 3);
+
+          const grad = ctx.createLinearGradient(0, y, plotWidth, y);
+          grad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
+          grad.addColorStop(1, 'rgba(245, 158, 11, 0.04)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, y, plotWidth, boxH);
+
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(0, y, plotWidth, boxH);
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = 'rgba(245, 158, 11, 0.9)';
+          ctx.font = 'bold 10px "JetBrains Mono", monospace';
+          ctx.fillText('★ GOLDEN POCKET FIBONACCI (0.618 - 0.705)', 12, y + 14);
+        }
+      }
+
+      if (layerOptions.orderBlocks && ans.order_blocks) {
+        ans.order_blocks.forEach((ob) => {
+          const yTop = candleSeries.priceToCoordinate(ob.top);
+          const yBottom = candleSeries.priceToCoordinate(ob.bottom);
+
+          if (yTop !== null && yBottom !== null) {
+            let xStart = timeScale.timeToCoordinate(ob.time);
+            if (xStart === null || xStart < 0) xStart = 0;
+            const boxW = Math.max(plotWidth - xStart, 40);
+            const y = Math.min(yTop, yBottom);
+            const boxH = Math.max(Math.abs(yBottom - yTop), 3);
+
+            if (ob.type === 'BULLISH') {
+              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+              grad.addColorStop(0, 'rgba(16, 185, 129, 0.22)');
+              grad.addColorStop(1, 'rgba(16, 185, 129, 0.04)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(xStart, y, boxW, boxH);
+
+              ctx.strokeStyle = 'rgba(16, 185, 129, 0.75)';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([3, 3]);
+              ctx.strokeRect(xStart, y, boxW, boxH);
+              ctx.setLineDash([]);
+
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.95)';
+              ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              ctx.fillText(`BULLISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
+            } else {
+              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+              grad.addColorStop(0, 'rgba(244, 63, 94, 0.22)');
+              grad.addColorStop(1, 'rgba(244, 63, 94, 0.04)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(xStart, y, boxW, boxH);
+
+              ctx.strokeStyle = 'rgba(244, 63, 94, 0.75)';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([3, 3]);
+              ctx.strokeRect(xStart, y, boxW, boxH);
+              ctx.setLineDash([]);
+
+              ctx.fillStyle = 'rgba(244, 63, 94, 0.95)';
+              ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              ctx.fillText(`BEARISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
+            }
+          }
+        });
+      }
+
+      if (layerOptions.fvgs && ans.fvgs) {
+        ans.fvgs.forEach((fvg) => {
+          const yTop = candleSeries.priceToCoordinate(fvg.top);
+          const yBottom = candleSeries.priceToCoordinate(fvg.bottom);
+
+          if (yTop !== null && yBottom !== null) {
+            let xStart = timeScale.timeToCoordinate(fvg.time);
+            if (xStart === null || xStart < 0) xStart = 0;
+            const boxW = Math.max(plotWidth - xStart, 30);
+            const y = Math.min(yTop, yBottom);
+            const boxH = Math.max(Math.abs(yBottom - yTop), 2);
+
+            const isBull = fvg.type === 'BULLISH';
+            const colorRgb = isBull ? '6, 182, 212' : '249, 115, 22';
+
+            const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+            grad.addColorStop(0, `rgba(${colorRgb}, 0.16)`);
+            grad.addColorStop(1, `rgba(${colorRgb}, 0.03)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(xStart, y, boxW, boxH);
+
+            ctx.strokeStyle = `rgba(${colorRgb}, 0.7)`;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 3]);
+            ctx.strokeRect(xStart, y, boxW, boxH);
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = `rgba(${colorRgb}, 0.9)`;
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.fillText(`FVG GAP  $${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}`, xStart + 8, y + 11);
+          }
+        });
+      }
+    }
+
+    function updateDataTables(ans) {
+      if (!ans) return;
+
+      const obList = document.getElementById('obList');
+      const obCount = document.getElementById('obCount');
+      if (obList && ans.order_blocks) {
+        obCount.innerText = `${ans.order_blocks.length} zonas`;
+        if (ans.order_blocks.length === 0) {
+          obList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin Order Blocks activos en 15m.</div>';
+        } else {
+          obList.innerHTML = '';
+          ans.order_blocks.forEach((ob, i) => {
+            const isBull = ob.type === 'BULLISH';
+            const badgeClass = isBull ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${ob.type}</span>
+                <span class="text-white font-bold">$${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">Δ $${(ob.top - ob.bottom).toFixed(2)}</span>
+            `;
+            obList.appendChild(div);
+          });
+        }
+      }
+
+      const fvgList = document.getElementById('fvgList');
+      const fvgCount = document.getElementById('fvgCount');
+      if (fvgList && ans.fvgs) {
+        fvgCount.innerText = `${ans.fvgs.length} zonas`;
+        if (ans.fvgs.length === 0) {
+          fvgList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin FVGs activos.</div>';
+        } else {
+          fvgList.innerHTML = '';
+          ans.fvgs.forEach((fvg) => {
+            const isBull = fvg.type === 'BULLISH';
+            const badgeClass = isBull ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${fvg.type}</span>
+                <span class="text-slate-200 font-semibold">$${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">Gap: $${(fvg.top - fvg.bottom).toFixed(2)}</span>
+            `;
+            fvgList.appendChild(div);
+          });
+        }
+      }
+
+      if (ans.fib_levels) {
+        const fib = ans.fib_levels;
+        if (fib['1.0']) document.getElementById('fib100').innerText = `$${fib['1.0'].toFixed(2)}`;
+        if (fib['0.705']) document.getElementById('fib705').innerText = `$${fib['0.705'].toFixed(2)}`;
+        if (fib['0.618']) document.getElementById('fib618').innerText = `$${fib['0.618'].toFixed(2)}`;
+        if (fib['0.50']) document.getElementById('fib50').innerText = `$${fib['0.50'].toFixed(2)}`;
+        if (fib['0.0']) document.getElementById('fib0').innerText = `$${fib['0.0'].toFixed(2)}`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      connectWebSocket();
+    });
+  
+
+    // Actualizar Paneles de Spot y Futuros en Vivo
+    function updateTradingPanels(setups, solPrice) {
+      if (!setups) return;
+
+      const spot = setups.spot;
+      if (spot) {
+        const statusEl = document.getElementById('spotStatusBadge');
+        if (statusEl) statusEl.innerText = spot.status;
+
+        const optEl = document.getElementById('spotEntryOpt');
+        if (optEl) optEl.innerText = `$${spot.entry_optimal.toFixed(2)}`;
+
+        const secEl = document.getElementById('spotEntrySec');
+        if (secEl) secEl.innerText = `$${spot.entry_secondary.toFixed(2)}`;
+
+        const slEl = document.getElementById('spotStopLoss');
+        if (slEl) slEl.innerText = `$${spot.stop_loss.toFixed(2)}`;
+
+        const slDistEl = document.getElementById('spotSlDist');
+        if (slDistEl) slDistEl.innerText = `-$${spot.sl_distance_usd.toFixed(2)} (-${spot.sl_distance_pct.toFixed(2)}%)`;
+
+        const tp1El = document.getElementById('spotTp1');
+        if (tp1El) tp1El.innerText = `$${spot.tp1.toFixed(2)}`;
+        const tp1PctEl = document.getElementById('spotTp1Pct');
+        if (tp1PctEl) tp1PctEl.innerText = `+${spot.tp1_pct.toFixed(1)}%`;
+
+        const tp2El = document.getElementById('spotTp2');
+        if (tp2El) tp2El.innerText = `$${spot.tp2.toFixed(2)}`;
+        const tp2PctEl = document.getElementById('spotTp2Pct');
+        if (tp2PctEl) tp2PctEl.innerText = `+${spot.tp2_pct.toFixed(1)}%`;
+
+        const tp3El = document.getElementById('spotTp3');
+        if (tp3El) tp3El.innerText = `$${spot.tp3.toFixed(2)}`;
+        const tp3PctEl = document.getElementById('spotTp3Pct');
+        if (tp3PctEl) tp3PctEl.innerText = `+${spot.tp3_pct.toFixed(1)}%`;
+
+        const rrEl = document.getElementById('spotRatioRR');
+        if (rrEl) rrEl.innerText = `R:R ${spot.risk_reward}`;
+
+        const tipEl = document.getElementById('spotAllocationTip');
+        if (tipEl && spot.allocation_tip) tipEl.innerText = spot.allocation_tip;
+      }
+
+      const fut = setups.futures;
+      if (fut) {
+        const dirEl = document.getElementById('futDirBadge');
+        if (dirEl) {
+          dirEl.innerText = fut.direction;
+          dirEl.className = fut.direction === 'LONG'
+            ? 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse'
+            : 'text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse';
+        }
+
+        const levEl = document.getElementById('futLevBadge');
+        if (levEl) levEl.innerText = fut.leverage_recommended || '5x - 10x';
+
+        const entryPriceEl = document.getElementById('futEntryPrice');
+        if (entryPriceEl) entryPriceEl.innerText = `$${fut.entry_trigger.toFixed(2)}`;
+
+        const entryDistEl = document.getElementById('futEntryDist');
+        if (entryDistEl) entryDistEl.innerText = `Dist: $${fut.entry_distance_usd.toFixed(2)} (${fut.entry_distance_pct.toFixed(2)}%)`;
+
+        const slEl = document.getElementById('futStopLoss');
+        if (slEl) slEl.innerText = `$${fut.stop_loss.toFixed(2)}`;
+
+        const slDistEl = document.getElementById('futSlDist');
+        if (slDistEl) slDistEl.innerText = `-$${fut.sl_distance_usd.toFixed(2)} (-${fut.sl_distance_pct.toFixed(2)}%)`;
+
+        const slDist10xEl = document.getElementById('futSlDist10x');
+        if (slDist10xEl) slDist10xEl.innerText = `-${(fut.sl_distance_pct * 10).toFixed(1)}% con 10x`;
+
+        const tp1El = document.getElementById('futTp1');
+        if (tp1El) tp1El.innerText = `$${fut.tp1.toFixed(2)}`;
+        const tp1PctEl = document.getElementById('futTp1Pct');
+        if (tp1PctEl) tp1PctEl.innerText = `+${fut.tp1_pct.toFixed(1)}% (+${(fut.tp1_pct * 10).toFixed(0)}% con 10x)`;
+
+        const tp2El = document.getElementById('futTp2');
+        if (tp2El) tp2El.innerText = `$${fut.tp2.toFixed(2)}`;
+        const tp2PctEl = document.getElementById('futTp2Pct');
+        if (tp2PctEl) tp2PctEl.innerText = `+${fut.tp2_pct.toFixed(1)}% (+${(fut.tp2_pct * 10).toFixed(0)}% con 10x)`;
+
+        const tp3El = document.getElementById('futTp3');
+        if (tp3El) tp3El.innerText = `$${fut.tp3.toFixed(2)}`;
+        const tp3PctEl = document.getElementById('futTp3Pct');
+        if (tp3PctEl) tp3PctEl.innerText = `+${fut.tp3_pct.toFixed(1)}% (+${(fut.tp3_pct * 10).toFixed(0)}% con 10x)`;
+
+        const liq10xEl = document.getElementById('futLiq10x');
+        if (liq10xEl) liq10xEl.innerText = `$${fut.est_liq_10x.toFixed(2)}`;
+
+        const liq5xEl = document.getElementById('futLiq5x');
+        if (liq5xEl) liq5xEl.innerText = `$${fut.est_liq_5x.toFixed(2)}`;
+      }
+    }
+
+  </script>
+</body>
+</html>

@@ -13,7 +13,8 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
             "trend": "NEUTRAL",
             "suggested_strike": round(current_price),
             "suggested_type": "NONE",
-            "pending_setup": None
+            "pending_setup": None,
+            "trading_setups": None
         }
 
     # 1. Detectar Swing Highs y Swing Lows
@@ -263,6 +264,98 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
     else:
         rationale = f"En espera del precio ${target_price:.2f} ({target_reason}). Distancia: ${dist_usd:.2f} ({dist_pct:.2f}%). Confluencia actual: {confluence_score}% / 65% requerido."
 
+    # 8. Generar Analisis y Setups de Trading para SPOT y FUTUROS
+    bull_obs = [ob for ob in active_obs if ob["type"] == "BULLISH"]
+    bear_obs = [ob for ob in active_obs if ob["type"] == "BEARISH"]
+
+    # --- SETUP SPOT (Acumulacion / Swing sin apalancamiento) ---
+    if bull_obs:
+        best_bull_ob = max(bull_obs, key=lambda x: x["top"])
+        spot_entry_opt = best_bull_ob["top"]
+        spot_entry_sec = best_bull_ob["bottom"]
+    else:
+        spot_entry_opt = fib_levels["0.618"]
+        spot_entry_sec = fib_levels["0.50"]
+
+    spot_sl = round(min(recent_low, spot_entry_sec) * 0.992, 2)
+    spot_risk = max(current_price - spot_sl, 0.5)
+
+    spot_tp1 = round(max(recent_high, current_price + spot_risk * 1.5), 2)
+    spot_tp2 = round(current_price + spot_risk * 2.8, 2)
+    spot_tp3 = round(current_price + spot_risk * 4.5, 2)
+
+    spot_setup = {
+        "status": "ZONA DE COMPRA" if trend == "BULLISH" else "ZONA DE ESPERA / DCA",
+        "action": "COMPRA_SPOT",
+        "entry_optimal": round(spot_entry_opt, 2),
+        "entry_secondary": round(spot_entry_sec, 2),
+        "stop_loss": round(spot_sl, 2),
+        "sl_distance_usd": round(abs(current_price - spot_sl), 2),
+        "sl_distance_pct": round(abs(current_price - spot_sl) / current_price * 100, 2),
+        "tp1": round(spot_tp1, 2),
+        "tp1_pct": round(max((spot_tp1 - current_price) / current_price * 100, 0.5), 2),
+        "tp2": round(spot_tp2, 2),
+        "tp2_pct": round(max((spot_tp2 - current_price) / current_price * 100, 1.0), 2),
+        "tp3": round(spot_tp3, 2),
+        "tp3_pct": round(max((spot_tp3 - current_price) / current_price * 100, 2.0), 2),
+        "risk_reward": f"1:{round(max(spot_tp2 - current_price, 1.0) / max(spot_risk, 0.1), 1)}",
+        "allocation_tip": "Asignacion sugerida: 5% a 10% del capital Spot. Compras escalonadas (60% en Entrada 1, 40% en Entrada 2).",
+        "invalidation_reason": "Perdida del ultimo minimo estructural mayor (Swing Low en 15m)."
+    }
+
+    # --- SETUP FUTUROS (Long o Short con Apalancamiento) ---
+    fut_dir = "LONG" if trend == "BULLISH" else "SHORT"
+    if fut_dir == "LONG":
+        fut_entry = spot_entry_opt
+        fut_sl = round(spot_entry_sec * 0.994, 2)
+        fut_risk = max(fut_entry - fut_sl, 0.4)
+        fut_tp1 = round(fut_entry + fut_risk * 1.5, 2)
+        fut_tp2 = round(fut_entry + fut_risk * 3.0, 2)
+        fut_tp3 = round(fut_entry + fut_risk * 5.0, 2)
+    else:  # SHORT
+        if bear_obs:
+            best_bear_ob = min(bear_obs, key=lambda x: x["bottom"])
+            fut_entry = best_bear_ob["bottom"]
+            fut_sl = round(best_bear_ob["top"] * 1.006, 2)
+        else:
+            fut_entry = fib_levels["0.618"]
+            fut_sl = round(fib_levels["0.705"] * 1.006, 2)
+        fut_risk = max(fut_sl - fut_entry, 0.4)
+        fut_tp1 = round(fut_entry - fut_risk * 1.5, 2)
+        fut_tp2 = round(fut_entry - fut_risk * 3.0, 2)
+        fut_tp3 = round(fut_entry - fut_risk * 5.0, 2)
+
+    fut_sl_pct = round(abs(fut_entry - fut_sl) / fut_entry * 100, 2)
+    fut_setup = {
+        "direction": fut_dir,
+        "status": f"SENAL {fut_dir} ACTIVA" if confluence_score >= 50 else f"ACECHANDO {fut_dir}",
+        "entry_trigger": round(fut_entry, 2),
+        "entry_distance_usd": round(abs(current_price - fut_entry), 2),
+        "entry_distance_pct": round(abs(current_price - fut_entry) / current_price * 100, 2),
+        "leverage_recommended": "5x - 10x (Aislado)",
+        "stop_loss": round(fut_sl, 2),
+        "sl_distance_usd": round(abs(fut_entry - fut_sl), 2),
+        "sl_distance_pct": fut_sl_pct,
+        "tp1": round(fut_tp1, 2),
+        "tp1_pct": round(abs(fut_tp1 - fut_entry) / fut_entry * 100, 2),
+        "tp1_action": "Cerrar 50% de posicion + mover SL a Breakeven",
+        "tp2": round(fut_tp2, 2),
+        "tp2_pct": round(abs(fut_tp2 - fut_entry) / fut_entry * 100, 2),
+        "tp2_action": "Toma parcial 30% en siguiente resistencia/soporte",
+        "tp3": round(fut_tp3, 2),
+        "tp3_pct": round(abs(fut_tp3 - fut_entry) / fut_entry * 100, 2),
+        "tp3_action": "Dejar correr 20% residual con Trailing Stop",
+        "risk_reward": "1:3.0",
+        "est_liq_5x": round(fut_entry * (0.81 if fut_dir == "LONG" else 1.19), 2),
+        "est_liq_10x": round(fut_entry * (0.91 if fut_dir == "LONG" else 1.09), 2),
+        "risk_rule": "Riesgo maximo: 1% a 2% del balance de futuros por trade. Usar siempre Margen Aislado."
+    }
+
+    trading_setups = {
+        "spot": spot_setup,
+        "futures": fut_setup
+    }
+
     return {
         "signal": signal,
         "confidence": confluence_score,
@@ -274,7 +367,8 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
         "sma20": round(sma20, 2),
         "suggested_strike": suggested_strike,
         "suggested_type": suggested_type,
-        "pending_setup": pending_setup
+        "pending_setup": pending_setup,
+        "trading_setups": trading_setups
     }
 
 

@@ -16,32 +16,37 @@ Bot cuantitativo institucional de scalping para opciones vanilla en Binance, ope
    - Retrocesos dorados de **Fibonacci (0.618 y 0.705)**.
    - Confluencia mínima del 65% requerida para gatillar una entrada.
 
-3. **Monitor y Centro de Operaciones Unificado**:
+3. **Centro de Análisis de Trading Spot y Futuros (`/trading`)**:
+   - Muestra el **Módulo Gráfico SMC Pro** de 15m con dibujos en vivo y **dos paneles analíticos a la derecha**:
+     - 🟢 **Panel Spot**: Precios de entrada sugeridos (Entrada Óptima OTE y Entrada DCA), Stop Loss por invalidación estructural con distancia ($ y %), tres Take Profits escalonados con rendimientos %, ratio R:R y recomendaciones de asignación de cartera sin apalancamiento ni riesgo de liquidación.
+     - ⚡ **Panel Futuros USD-M**: Dirección sugerida (LONG o SHORT según confluencia institucional), precio de entrada Trigger en Order Blocks, apalancamiento recomendado (5x - 10x Aislado), Stop Loss estricto de margen, TP1 (50% + Breakeven), TP2 (30%), TP3 (20% Runners), y precio de liquidación estimado con 5x y 10x.
+
+4. **Monitor y Centro de Operaciones Unificado**:
    - **Monitor de Operaciones Dinámico**: Muestra en tiempo real qué precio está tratando de atrapar el bot (`En espera del precio $X`), la distancia en dólares y porcentaje, la zona detectada (Order Block / Fibonacci) y el nivel de confluencia. Al activarse, cambia automáticamente a `Operación en curso en precio $X` con el precio de entrada de SOL, prima, PnL flotante y tiempo contra el Theta Decay.
    - **Centro de Operaciones con Pestañas**: Visualización completa y filtrable de todas las operaciones:
      - ⏳ **En Espera**: Setups pendientes por gatillar si el precio de SOL llega al punto esperado con confluencia.
      - ⚡ **En Proceso**: Posiciones abiertas con PnL neto en vivo y botón de cierre de emergencia.
      - ✓ **Culminadas**: Historial completo con hora, strike, precios de entrada y salida de SOL, primas y resultado final neto ($ y %).
 
-4. **Módulo Gráfico SMC Pro (`/grafico`)**:
+5. **Módulo Gráfico SMC Pro (`/grafico`)**:
    - Apartado dedicado exclusivamente a la visualización gráfica de alta resolución.
    - Dibuja en tiempo real las cajas sombreadas de Order Blocks (alcistas y bajistas), vacíos de liquidez FVG, banda del Golden Pocket de Fibonacci y media móvil de tendencia dinámica (SMA 20).
    - Interruptores interactivos para encender/apagar capas visuales en vivo.
 
-5. **Scalping Rápido contra el Theta Decay**:
+6. **Scalping Rápido contra el Theta Decay**:
    - Compra de contratos diarios o a 1-2 días de vencimiento (0DTE / Daily Options).
    - Entradas en compresión y salidas rápidas (**Take Profit +75%**, **Stop Loss -35%**, o límite de tiempo de **90 minutos** para evitar que el paso de las horas degrade la prima).
    - Reventa directa del contrato en el mercado de opciones (sin tocar Spot ni comprar la moneda).
 
-6. **Dos Modos de Operación (Conmutables en 1 Clic)**:
+7. **Dos Modos de Operación (Conmutables en 1 Clic)**:
    - 🧪 **MODO PAPER TRADING (SIMULACIÓN)**: Activo por defecto. Se conecta a Binance en tiempo real vía WebSockets públicos, detecta velas reales y simula la compra/venta y PnL de las opciones con el modelo Black-Scholes sin arriesgar dinero.
    - ⚠️ **MODO REAL**: Activado únicamente cuando tú lo decidas y configures tus API Keys desde el Dashboard.
 
-7. **Configuración de Binance desde la Web**:
+8. **Configuración de Binance desde la Web**:
    - No necesitas editar archivos de código.
    - En el Dashboard, haz clic en **'Configurar API'**, pega tu API Key y Secret, y haz clic en **'Probar y Guardar'**. El sistema valida la conexión con `vapi.binance.com`, verifica tus permisos y muestra tu saldo disponible.
 
-8. **Protección de Acceso y Gestión de Credenciales**:
+9. **Protección de Acceso y Gestión de Credenciales**:
    - Acceso restringido al Dashboard mediante autenticación con cookies firmadas criptográficamente (HMAC-SHA256).
    - Posibilidad de cambiar usuario y contraseña directamente desde la interfaz web.
 

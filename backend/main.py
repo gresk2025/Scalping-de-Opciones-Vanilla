@@ -193,6 +193,13 @@ async def serve_index(request: Request):
     return {"message": "Frontend no encontrado."}
 
 @app.get("/grafico")
+@app.get("/trading")
+def get_trading_page(request: Request):
+    if not is_user_authenticated(request):
+        return RedirectResponse(url="/login")
+    trading_file = FRONTEND_DIR / "trading.html"
+    return FileResponse(trading_file)
+
 @app.get("/chart")
 async def serve_chart(request: Request):
     if not is_user_authenticated(request):
