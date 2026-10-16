@@ -329,37 +329,87 @@
   </main>
 
   <div id="configModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <span>⚙️</span> Configuración de Binance Opciones
         </h3>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">&times;</button>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
       </div>
 
       <p class="text-xs text-slate-300 leading-relaxed">
         Ingresa tus claves de API cuando decidas operar en <strong>Modo Real</strong>. El sistema probará la conexión y los permisos de opciones antes de guardar.
       </p>
 
-      <div class="flex flex-col gap-3 text-xs">
+      <!-- Guía Paso a Paso Desplegable -->
+      <div class="border border-indigo-500/30 rounded-xl overflow-hidden bg-indigo-950/20">
+        <button type="button" onclick="toggleApiGuide()" class="w-full p-2.5 bg-indigo-950/40 hover:bg-indigo-950/70 text-indigo-300 text-xs font-semibold flex items-center justify-between transition">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            📖 Instrucciones para crear tu API en Binance (Paso a paso)
+          </span>
+          <span id="apiGuideArrow" class="text-xs transition-transform duration-200">▼</span>
+        </button>
+
+        <div id="apiGuideContent" class="hidden p-3.5 text-[11px] text-slate-300 flex flex-col gap-2 max-h-[280px] overflow-y-auto custom-scroll border-t border-indigo-900/40 bg-slate-950/60">
+          <ol class="list-decimal list-inside space-y-2 leading-relaxed text-slate-300">
+            <li><strong>Entra a tu cuenta en Binance:</strong> Inicia sesión normalmente.</li>
+            <li><strong>Gestión de API:</strong> Haz clic en el ícono de tu perfil (arriba a la derecha) ➔ <strong>Gestión de API</strong> (<em>API Management</em>).</li>
+            <li><strong>Crear API:</strong> Clic en el botón amarillo <strong>Crear API</strong> ➔ Selecciona la opción <strong>Generada por el sistema</strong> (HMAC).</li>
+            <li><strong>Nombre descriptivo:</strong> Asígnale un nombre (por ejemplo: <code class="text-indigo-300 font-mono">Bot-Opciones-Solana</code>).</li>
+            <li><strong>Verificación de Seguridad:</strong> Completa tu verificación (código por correo / 2FA / Passkey).</li>
+            <li><strong>Restricción de IP (REQUERIDO para Opciones):</strong>
+              <div class="mt-1 pl-2 border-l-2 border-amber-500/50 text-slate-300">
+                Haz clic en <strong>"Editar restricciones"</strong>. Selecciona <strong>"Restringir el acceso solo a IPs de confianza"</strong> e introduce la IP de tu servidor VPS:
+                <div class="mt-1 flex items-center gap-2">
+                  <code id="displayVpsIp" class="bg-slate-900 px-2 py-0.5 rounded text-amber-300 font-bold border border-slate-700 select-all font-mono">IP_DE_TU_VPS</code>
+                  <button type="button" onclick="copyIpToClipboard()" id="btnCopyIp" class="px-2.5 py-0.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-sans font-semibold transition shadow-sm">
+                    Copiar IP 📋
+                  </button>
+                </div>
+                <span class="text-[10px] text-slate-400 italic">Al colocar tu IP fija, Binance desbloquea el trading de opciones y evita que la clave expire cada 90 días.</span>
+              </div>
+            </li>
+            <li><strong>Permisos a Activar:</strong>
+              <ul class="list-disc list-inside pl-2 space-y-0.5 mt-0.5 text-slate-300">
+                <li>✅ <strong>Habilitar Lectura</strong> (<em>Enable Reading</em>).</li>
+                <li>✅ <strong>Habilitar Opciones / Trading de Opciones Vanilla</strong> (<em>Enable Vanilla Options Trading</em>).</li>
+                <li class="text-rose-400 font-bold">⛔ NUNCA marques "Habilitar Retiros" (Withdrawals). El dinero jamás podrá salir de tu cuenta; el bot solo compra/vende opciones.</li>
+              </ul>
+            </li>
+            <li><strong>Copia del Secret Key:</strong>
+              <div class="text-amber-300">⚠️ Copia tu <strong>API Key</strong> y tu <strong>Secret Key</strong> inmediatamente. Binance solo muestra el Secret Key una sola vez al crear la API; si recargas la página se ocultará para siempre.</div>
+            </li>
+            <li><strong>Billetera de Opciones:</strong>
+              <div class="text-slate-300">En Binance, transfiere tu saldo de trading ($10 a $30 USD) a la <strong>Billetera de Opciones</strong> (<em>Options Wallet</em>) desde <em>Billeteras ➔ Transferir ➔ De Spot a Opciones</em> (es instantáneo y sin comisiones).</div>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 text-xs pt-1">
         <div>
-          <label class="block text-slate-300 font-semibold mb-1">Binance API Key:</label>
-          <input type="text" id="inputApiKey" placeholder="Pega tu API Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
+          <label class="block text-slate-400 font-medium mb-1">Binance API Key:</label>
+          <input type="password" id="inputApiKey" placeholder="Pega tu API Key de Binance"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-slate-300 font-semibold mb-1">Binance Secret Key:</label>
-          <input type="password" id="inputApiSecret" placeholder="Pega tu Secret Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
+          <label class="block text-slate-400 font-medium mb-1">Binance Secret Key:</label>
+          <input type="password" id="inputApiSecret" placeholder="Pega tu Secret Key de Binance"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-3 pt-2">
+        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800/80">
           <div>
-            <label class="block text-slate-400 text-[11px] mb-1">Lote (Contratos):</label>
-            <input type="number" id="inputContracts" min="1" max="10" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+            <label class="block text-slate-400 font-medium mb-1">Lote (Contratos):</label>
+            <input type="number" id="inputContracts" value="5" min="1" max="10"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-slate-400 text-[11px] mb-1">Máx Pérdida Diaria ($):</label>
-            <input type="number" id="inputMaxLoss" min="1" max="20" step="0.5" value="5.0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+            <label class="block text-slate-400 font-medium mb-1">Máx Pérdida Diaria ($):</label>
+            <input type="number" id="inputMaxLoss" value="5.0" step="0.5" min="1.0"
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
           </div>
         </div>
 
@@ -711,7 +761,33 @@
       }
     }
 
+    function toggleApiGuide() {
+      const content = document.getElementById('apiGuideContent');
+      const arrow = document.getElementById('apiGuideArrow');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.innerText = '▲';
+      } else {
+        content.classList.add('hidden');
+        arrow.innerText = '▼';
+      }
+    }
+
+    function copyIpToClipboard() {
+      const ipEl = document.getElementById('displayVpsIp');
+      const btn = document.getElementById('btnCopyIp');
+      const ip = ipEl ? ipEl.innerText.trim() : window.location.hostname;
+      navigator.clipboard.writeText(ip).then(() => {
+        btn.innerText = '¡Copiado! ✓';
+        setTimeout(() => { btn.innerText = 'Copiar IP 📋'; }, 2000);
+      });
+    }
+
     function openConfigModal() {
+      if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        const ipEl = document.getElementById('displayVpsIp');
+        if (ipEl) ipEl.innerText = window.location.hostname;
+      }
       document.getElementById('configModal').classList.remove('hidden');
     }
 
