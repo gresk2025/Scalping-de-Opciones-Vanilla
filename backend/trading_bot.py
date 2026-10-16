@@ -117,6 +117,11 @@ class TradingBot:
                 if current_sol > 0 and len(self.md.klines_15m) >= 20:
                     # 1. Ejecutar análisis SMC continuo
                     self.current_analysis = analyze_smc(self.md.klines_15m, current_sol)
+                    if time.time() - self.last_scan_log >= 300 and not self.active_trade:
+                        tr_name = self.current_analysis.get('trend', 'NEUTRAL')
+                        conf_sc = self.current_analysis.get('confidence', 0)
+                        add_log('INFO', f"Scanner 15m activo: SOL ${current_sol:.2f} | Tendencia {tr_name} | Confluencia SMC {conf_sc}% | Monitoreando")
+                        self.last_scan_log = time.time()
 
                     # 2. Verificar Circuit Breaker diario
                     daily_pnl = get_daily_pnl()
@@ -165,7 +170,7 @@ class TradingBot:
                         sig = self.current_analysis["signal"]
                         conf = self.current_analysis["confidence"]
 
-                        if sig in ["BUY_CALL", "BUY_PUT"] and conf >= 70:
+                        if sig in ["BUY_CALL", "BUY_PUT"] and conf >= 65:
                             opt_type = self.current_analysis["suggested_type"]
                             strike = self.current_analysis["suggested_strike"]
                             contracts = int(self.settings.get("default_contracts", 5))
@@ -239,6 +244,7 @@ class TradingBot:
 
         return {
             "status": status_text,
+            "current_user": self.settings.get("dashboard_user", "admin"),
             "paper_trading": self.settings.get("paper_trading", True),
             "sol_price": current_sol,
             "price_change_24h": self.md.price_change_24h,

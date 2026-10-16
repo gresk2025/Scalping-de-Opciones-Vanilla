@@ -1,4 +1,4 @@
-﻿# Scalping de Opciones Vanilla — SOL/USDT
+﻿# Scalping de Opciones Vanilla - SOL/USDT
 
 Bot cuantitativo institucional de scalping para opciones vanilla en Binance, operando con la estrategia de **Smart Money Concepts (SMC)** y gestión de riesgo estricta.
 
@@ -14,7 +14,7 @@ Bot cuantitativo institucional de scalping para opciones vanilla en Binance, ope
    - Detección algorítmica de **Order Blocks (OB)** institucionales.
    - Identificación de **Fair Value Gaps (FVG)** o vacíos de liquidez.
    - Retrocesos dorados de **Fibonacci (0.618 y 0.705)**.
-   - Confluencia mínima del 70% requerida para gatillar una entrada.
+   - Confluencia mínima del 65% requerida para gatillar una entrada.
 
 3. **Scalping Rápido contra el Theta Decay**:
    - Compra de contratos diarios o a 1-2 días de vencimiento (0DTE / Daily Options).
@@ -29,9 +29,23 @@ Bot cuantitativo institucional de scalping para opciones vanilla en Binance, ope
    - No necesitas editar archivos de código.
    - En el Dashboard, haz clic en **'Configurar API'**, pega tu API Key y Secret, y haz clic en **'Probar y Guardar'**. El sistema valida la conexión con `vapi.binance.com`, verifica tus permisos y muestra tu saldo disponible.
 
+6. **Protección de Acceso y Gestión de Credenciales**:
+   - Acceso restringido al Dashboard mediante autenticación con cookies firmadas criptográficamente (HMAC-SHA256).
+   - Posibilidad de cambiar usuario y contraseña directamente desde la interfaz web.
+
 ---
 
-## 🖥️ Cómo Iniciar el Bot
+## 🔐 Acceso al Dashboard y Seguridad
+
+- **Credenciales por defecto para nuevas instalaciones**:
+  - **Usuario**: `admin`
+  - **Contraseña**: `admin123`
+- **Cambio de credenciales**: En la barra superior del Dashboard, haz clic sobre el botón de tu usuario para abrir el modal de seguridad y actualizar tus credenciales ingresando tu contraseña actual para confirmar.
+- **Persistencia**: La sesión se mantiene activa de forma segura y sobrevive a reinicios del servidor.
+
+---
+
+## 💻 Cómo Iniciar el Bot
 
 ### En tu PC local (Windows):
 Haz doble clic en el archivo:

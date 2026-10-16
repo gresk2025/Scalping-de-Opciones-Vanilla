@@ -87,6 +87,15 @@
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           <span>Configurar API</span>
         </button>
+
+        <button onclick="openCredentialsModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Cambiar usuario o contraseña">
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <span id="navUsername">admin</span>
+        </button>
+
+        <button onclick="handleLogout()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition flex items-center gap-1" title="Cerrar Sesión">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        </button>
       </div>
     </div>
   </header>
@@ -359,6 +368,60 @@
     </div>
   </div>
 
+  <!-- Modal de Credenciales y Seguridad -->
+  <div id="credentialsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          Seguridad de Acceso
+        </h3>
+        <button onclick="closeCredentialsModal()" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Modifica el usuario y la clave de acceso al Dashboard. Deberás ingresar tu contraseña actual para confirmar los cambios.
+      </p>
+
+      <div class="flex flex-col gap-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Contraseña Actual:</label>
+          <input type="password" id="inputCurrentPass" placeholder="Ingresa tu clave actual"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="border-t border-slate-800/80 pt-2">
+          <label class="block text-slate-400 font-medium mb-1">Nuevo Usuario:</label>
+          <input type="text" id="inputNewUser" placeholder="admin"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Nueva Contraseña:</label>
+          <input type="password" id="inputNewPass" placeholder="Mínimo 6 caracteres"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Confirmar Nueva Contraseña:</label>
+          <input type="password" id="inputConfirmPass" placeholder="Repite la nueva contraseña"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div id="credResultBox" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+        <button onclick="closeCredentialsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+          Cancelar
+        </button>
+        <button id="btnSaveCredentials" onclick="saveCredentials()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
+          <span>Guardar Cambios</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let chart, candleSeries;
     let ws = null;
@@ -441,6 +504,12 @@
 
     function updateDashboard(state) {
       currentBotState = state;
+      if (state.current_user) {
+        const navU = document.getElementById('navUsername');
+        if (navU) navU.innerText = state.current_user;
+        const inpU = document.getElementById('inputNewUser');
+        if (inpU && !inpU.value) inpU.value = state.current_user;
+      }
       isPaperMode = state.paper_trading;
 
       const banner = document.getElementById('modeBanner');
@@ -692,7 +761,99 @@
       }
     }
 
-    async function handleLogout() { await fetch('/api/auth/logout', { method: 'POST' }); window.location.href = '/login'; }
+    function openCredentialsModal() {
+      document.getElementById('inputCurrentPass').value = '';
+      document.getElementById('inputNewPass').value = '';
+      document.getElementById('inputConfirmPass').value = '';
+      document.getElementById('credResultBox').classList.add('hidden');
+      if (currentBotState && currentBotState.current_user) {
+        document.getElementById('inputNewUser').value = currentBotState.current_user;
+      }
+      document.getElementById('credentialsModal').classList.remove('hidden');
+    }
+
+    function closeCredentialsModal() {
+      document.getElementById('credentialsModal').classList.add('hidden');
+    }
+
+    async function saveCredentials() {
+      const currentPass = document.getElementById('inputCurrentPass').value.trim();
+      const newUser = document.getElementById('inputNewUser').value.trim();
+      const newPass = document.getElementById('inputNewPass').value.trim();
+      const confirmPass = document.getElementById('inputConfirmPass').value.trim();
+      const resultBox = document.getElementById('credResultBox');
+      const btn = document.getElementById('btnSaveCredentials');
+
+      if (!currentPass) {
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = 'Debes ingresar tu contraseña actual.';
+        resultBox.classList.remove('hidden');
+        return;
+      }
+
+      if (!newUser || newUser.length < 3) {
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = 'El usuario debe tener al menos 3 caracteres.';
+        resultBox.classList.remove('hidden');
+        return;
+      }
+
+      if (!newPass || newPass.length < 6) {
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = 'La nueva contraseña debe tener al menos 6 caracteres.';
+        resultBox.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = 'Las nuevas contraseñas no coinciden.';
+        resultBox.classList.remove('hidden');
+        return;
+      }
+
+      btn.innerText = 'Guardando...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/auth/change-credentials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            current_password: currentPass,
+            new_username: newUser,
+            new_password: newPass
+          })
+        });
+        const data = await res.json();
+        resultBox.classList.remove('hidden');
+
+        if (res.ok && data.success) {
+          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-800';
+          resultBox.innerHTML = `✓ ${data.message}`;
+          const navU = document.getElementById('navUsername');
+          if (navU) navU.innerText = data.username;
+          setTimeout(closeCredentialsModal, 1500);
+        } else {
+          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+          resultBox.innerHTML = `✗ ${data.detail || data.message || 'Error al actualizar credenciales.'}`;
+        }
+      } catch (err) {
+        resultBox.classList.remove('hidden');
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = `Error: ${err.message}`;
+      } finally {
+        btn.innerText = 'Guardar Cambios';
+        btn.disabled = false;
+      }
+    }
+
+    async function handleLogout() {
+      if (confirm('¿Deseas cerrar tu sesión?')) {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login';
+      }
+    }
     window.addEventListener('DOMContentLoaded', () => {
       initChart();
       connectWebSocket();

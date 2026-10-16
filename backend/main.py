@@ -96,6 +96,11 @@ class LoginPayload(BaseModel):
     username: str
     password: str
 
+class ChangeCredentialsPayload(BaseModel):
+    current_password: str
+    new_username: str
+    new_password: str
+
 class ModePayload(BaseModel):
     paper: bool
 
@@ -143,6 +148,40 @@ async def login(payload: LoginPayload, response: Response):
 async def logout(response: Response):
     response.delete_cookie("auth_session")
     return {"success": True}
+
+@app.post("/api/auth/change-credentials")
+async def change_credentials(payload: ChangeCredentialsPayload, request: Request, response: Response):
+    if not is_user_authenticated(request):
+        raise HTTPException(status_code=401, detail="No autorizado")
+
+    settings = load_settings()
+    current_expected_pass = settings.get("dashboard_pass", "admin123")
+
+    if payload.current_password != current_expected_pass:
+        raise HTTPException(status_code=400, detail="La contraseña actual no coincide")
+
+    new_user = payload.new_username.strip()
+    new_pass = payload.new_password.strip()
+
+    if not new_user or len(new_user) < 3:
+        raise HTTPException(status_code=400, detail="El nuevo usuario debe tener al menos 3 caracteres")
+    if not new_pass or len(new_pass) < 6:
+        raise HTTPException(status_code=400, detail="La nueva contraseña debe tener al menos 6 caracteres")
+
+    update_setting("dashboard_user", new_user)
+    update_setting("dashboard_pass", new_pass)
+    bot.reload_settings()
+
+    token = generate_auth_token(new_user)
+    response.set_cookie(
+        key="auth_session",
+        value=token,
+        max_age=86400 * 30,
+        httponly=True,
+        samesite="lax"
+    )
+    add_log("SUCCESS", f"Credenciales actualizadas para el usuario: {new_user}")
+    return {"success": True, "message": "Credenciales actualizadas correctamente", "username": new_user}
 
 @app.get("/")
 async def serve_index(request: Request):
