@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo Gráfico SMC Pro | Scalping SOL/USDT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+  <style>
+    body { background-color: #080B11; color: #E2E8F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.45); }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white pb-10">
+
+  <!-- Header Superior del Módulo Gráfico -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Volver y Título del Módulo -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          <span>Volver al Dashboard</span>
+        </a>
+
+        <div class="h-5 w-[1px] bg-slate-800 hidden sm:block"></div>
+
+        <div>
+          <h1 class="text-sm md:text-base font-bold text-white flex items-center gap-2">
+            Módulo Gráfico SMC Pro
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Velas 15M · SOL/USDT</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Visualización con dibujos algorítmicos en tiempo real (OB + FVG + Fib + Trend)</p>
+        </div>
+      </div>
+
+      <!-- Ticker y Status en Vivo -->
+      <div class="flex items-center gap-3 font-mono">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400" id="wsStatusDot" title="Binance WebSocket Conectado"></span>
+          <span class="font-bold text-base text-white" id="solPrice">$0.00</span>
+          <span class="text-xs font-semibold text-emerald-400" id="solChange">+0.00%</span>
+        </div>
+
+        <span id="trendBadge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">BULLISH</span>
+        <span id="confluenceBadge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold">40% Confluencia</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Contenido Principal del Módulo -->
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-4 w-full">
+    
+    <!-- Barra de Herramientas de Capas Visuales SMC -->
+    <div class="glass-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+          Capas SMC Dibujadas en el Gráfico:
+        </span>
+      </div>
+
+      <div class="flex items-center flex-wrap gap-1.5 text-xs font-mono">
+        <button id="btnLayerOB" onclick="toggleLayer('orderBlocks')" class="px-3 py-1 rounded-lg font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-700/60 transition flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Order Blocks (OB)</span>
+        </button>
+
+        <button id="btnLayerFVG" onclick="toggleLayer('fvgs')" class="px-3 py-1 rounded-lg font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-700/60 transition flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span>FVG Imbalances</span>
+        </button>
+
+        <button id="btnLayerFib" onclick="toggleLayer('fibonacci')" class="px-3 py-1 rounded-lg font-semibold bg-amber-950/70 text-amber-300 border border-amber-700/60 transition flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span>Fib 0.618 / 0.705</span>
+        </button>
+
+        <button id="btnLayerSMA" onclick="toggleLayer('sma')" class="px-3 py-1 rounded-lg font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 transition flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span>Tendencia (SMA 20)</span>
+        </button>
+
+        <button id="btnLayerZones" onclick="toggleLayer('zones')" class="px-3 py-1 rounded-lg font-semibold bg-violet-950/70 text-violet-300 border border-violet-700/60 transition flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-violet-400"></span>
+          <span>Cajas Sombreadas</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor del Gráfico con Overlay Dibujado (650px de altura) -->
+    <div id="chartContainerWrapper" class="w-full h-[650px] rounded-2xl overflow-hidden bg-slate-950/90 relative border border-slate-800/80 shadow-2xl">
+      <div id="chartContainer" class="w-full h-full relative">
+        <canvas id="smcOverlayCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+        
+        <!-- HUD Flotante en el Gráfico -->
+        <div id="chartFloatingHUD" class="absolute top-3 left-3 z-20 glass-panel px-3.5 py-2 rounded-xl text-xs font-mono pointer-events-none border border-slate-700/60 flex items-center gap-3 shadow-xl">
+          <span class="text-white font-bold" id="hudSolPrice">$0.00</span>
+          <span class="text-slate-500">|</span>
+          <span id="hudTrendBadge" class="text-emerald-400 font-semibold">TREND: BULLISH</span>
+          <span class="text-slate-500">|</span>
+          <span id="hudConfluenceBadge" class="text-indigo-400 font-semibold">SMC: 40%</span>
+        </div>
+
+        <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-30 text-xs text-slate-400">
+          Cargando velas históricas y calculando zonas de confluencia SMC...
+        </div>
+      </div>
+    </div>
+
+    <!-- Mesa de Datos Cuantitativos de Smart Money Concepts -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      
+      <!-- Card 1: Order Blocks Activos -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            Order Blocks Detectados (OB)
+          </h4>
+          <span id="obCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">0 zonas</span>
+        </div>
+        <div id="obList" class="flex flex-col gap-2 overflow-y-auto max-h-[190px] custom-scroll text-xs font-mono">
+          <div class="text-slate-500 py-4 text-center">Cargando Order Blocks...</div>
+        </div>
+      </div>
+
+      <!-- Card 2: Fair Value Gaps Activos -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            Fair Value Gaps (FVG Imbalance)
+          </h4>
+          <span id="fvgCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">0 zonas</span>
+        </div>
+        <div id="fvgList" class="flex flex-col gap-2 overflow-y-auto max-h-[190px] custom-scroll text-xs font-mono">
+          <div class="text-slate-500 py-4 text-center">Cargando FVGs...</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Niveles de Retroceso Fibonacci -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+          <h4 class="text-xs font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            Niveles Clave de Fibonacci
+          </h4>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Swing 30 Velas</span>
+        </div>
+        <div id="fibList" class="flex flex-col gap-1.5 text-xs font-mono">
+          <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-slate-400">
+            <span>Swing High (1.0)</span>
+            <span id="fib100" class="text-white font-bold">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-amber-300 font-semibold bg-amber-500/5 px-1 rounded">
+            <span>★ OTE (0.705)</span>
+            <span id="fib705" class="text-amber-300 font-bold">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-amber-400 font-bold bg-amber-500/10 px-1 rounded">
+            <span>★ Golden Pocket (0.618)</span>
+            <span id="fib618" class="text-amber-400 font-bold">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-slate-400">
+            <span>Equilibrio (0.50)</span>
+            <span id="fib50" class="text-slate-200">$0.00</span>
+          </div>
+          <div class="flex justify-between items-center py-1 text-slate-400">
+            <span>Swing Low (0.0)</span>
+            <span id="fib0" class="text-white font-bold">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tarjeta Explicativa de Estrategia Institucional -->
+    <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2">
+      <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        ¿Cómo interpreta el bot estos dibujos en el gráfico?
+      </h4>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Las <strong>cajas sombreadas verdes y rojas</strong> representan Order Blocks institucionales (zonas de compra/venta agresiva con quiebre de estructura). Las <strong>cajas cian y naranja</strong> representan vacíos de liquidez (FVGs) que actúan como imanes de precio. Cuando SOL retrocede hacia el <strong>Golden Pocket Fibonacci (0.618 - 0.705)</strong> dentro de una zona de Order Block a favor de la tendencia (SMA 20), el bot gatilla la compra de la opción Vanilla.
+      </p>
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT DEL MÓDULO GRÁFICO -->
+  <script>
+    let chart, candleSeries, smaSeries;
+    let ws = null;
+    let currentKlines = [];
+    let currentAnalysis = null;
+    let activePriceLines = [];
+
+    const layerOptions = {
+      orderBlocks: true,
+      fvgs: true,
+      fibonacci: true,
+      sma: true,
+      zones: true
+    };
+
+    function initChart() {
+      const container = document.getElementById('chartContainer');
+      chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        layout: {
+          background: { color: '#090D16' },
+          textColor: '#94A3B8',
+          fontSize: 11,
+          fontFamily: '"JetBrains Mono", monospace'
+        },
+        grid: {
+          vertLines: { color: 'rgba(30, 41, 59, 0.45)' },
+          horzLines: { color: 'rgba(30, 41, 59, 0.45)' }
+        },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.6)' },
+        timeScale: { borderColor: 'rgba(51, 65, 85, 0.6)', timeVisible: true, secondsVisible: false }
+      });
+
+      candleSeries = chart.addCandlestickSeries({
+        upColor: '#10B981',
+        downColor: '#F43F5E',
+        borderUpColor: '#10B981',
+        borderDownColor: '#F43F5E',
+        wickUpColor: '#10B981',
+        wickDownColor: '#F43F5E'
+      });
+
+      smaSeries = chart.addLineSeries({
+        color: '#10B981',
+        lineWidth: 2,
+        priceLineVisible: false,
+        crosshairMarkerVisible: false,
+        title: 'SMA 20'
+      });
+
+      chart.timeScale().subscribeVisibleTimeRangeChange(() => { drawSMCOverlayCanvas(); });
+      chart.timeScale().subscribeVisibleLogicalRangeChange(() => { drawSMCOverlayCanvas(); });
+
+      window.addEventListener('resize', () => {
+        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+        drawSMCOverlayCanvas();
+      });
+
+      loadKlines();
+    }
+
+    function toggleLayer(layerName) {
+      layerOptions[layerName] = !layerOptions[layerName];
+      const btnMap = {
+        orderBlocks: 'btnLayerOB',
+        fvgs: 'btnLayerFVG',
+        fibonacci: 'btnLayerFib',
+        sma: 'btnLayerSMA',
+        zones: 'btnLayerZones'
+      };
+      const btn = document.getElementById(btnMap[layerName]);
+      if (btn) {
+        if (layerOptions[layerName]) {
+          btn.classList.remove('opacity-40', 'line-through');
+        } else {
+          btn.classList.add('opacity-40', 'line-through');
+        }
+      }
+      if (currentAnalysis) {
+        drawSMCIndicators(currentAnalysis);
+      }
+    }
+
+    async function loadKlines() {
+      try {
+        const res = await fetch('/api/klines');
+        if (res.ok) {
+          const klines = await res.json();
+          if (klines && klines.length > 0) {
+            currentKlines = klines;
+            candleSeries.setData(klines);
+            updateSMA(klines);
+            document.getElementById('chartLoading').classList.add('hidden');
+            chart.timeScale().fitContent();
+          }
+        }
+      } catch (e) {
+        console.error('Error cargando klines:', e);
+      }
+    }
+
+    function calculateSMA(klines, period = 20) {
+      const result = [];
+      for (let i = period - 1; i < klines.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+          sum += klines[i - j].close;
+        }
+        result.push({ time: klines[i].time, value: sum / period });
+      }
+      return result;
+    }
+
+    function updateSMA(klines) {
+      if (layerOptions.sma && klines.length >= 20) {
+        const smaData = calculateSMA(klines, 20);
+        smaSeries.setData(smaData);
+      } else {
+        smaSeries.setData([]);
+      }
+    }
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+      };
+
+      ws.onmessage = (event) => {
+        const state = JSON.parse(event.data);
+        handleStateUpdate(state);
+      };
+
+      ws.onclose = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-rose-400 animate-ping';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = () => { ws.close(); };
+    }
+
+    function handleStateUpdate(state) {
+      if (candleSeries && state.sol_price > 0 && currentKlines.length > 0) {
+        const last = { ...currentKlines[currentKlines.length - 1] };
+        last.close = state.sol_price;
+        if (state.sol_price > last.high) last.high = state.sol_price;
+        if (state.sol_price < last.low) last.low = state.sol_price;
+        candleSeries.update(last);
+      }
+
+      const pStr = `$${state.sol_price.toFixed(2)}`;
+      document.getElementById('solPrice').innerText = pStr;
+      document.getElementById('hudSolPrice').innerText = pStr;
+
+      const chg = state.price_change_24h;
+      const chgStr = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
+      const chgEl = document.getElementById('solChange');
+      chgEl.innerText = chgStr;
+      chgEl.className = chg >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+
+      const ans = state.analysis;
+      currentAnalysis = ans;
+
+      const isBull = ans.trend === 'BULLISH';
+      const trendBadge = document.getElementById('trendBadge');
+      trendBadge.innerText = ans.trend;
+      trendBadge.className = isBull 
+        ? 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold'
+        : 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold';
+
+      const hudTrend = document.getElementById('hudTrendBadge');
+      hudTrend.innerText = `TREND: ${ans.trend}`;
+      hudTrend.className = isBull ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+
+      document.getElementById('confluenceBadge').innerText = `${ans.confidence}% Confluencia`;
+      document.getElementById('hudConfluenceBadge').innerText = `SMC: ${ans.confidence}%`;
+
+      drawSMCIndicators(ans);
+    }
+
+    function drawSMCIndicators(analysis) {
+      if (!analysis || !candleSeries) return;
+
+      activePriceLines.forEach(pl => {
+        try { candleSeries.removePriceLine(pl); } catch (e) {}
+      });
+      activePriceLines = [];
+
+      const markers = [];
+
+      if (layerOptions.fibonacci && analysis.fib_levels) {
+        const fib = analysis.fib_levels;
+        if (fib['0.618']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.618'],
+            color: '#F59E0B',
+            lineWidth: 2,
+            lineStyle: 0,
+            axisLabelVisible: true,
+            title: '★ Fib 0.618 (Golden Pocket)'
+          }));
+        }
+        if (fib['0.705']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.705'],
+            color: '#D97706',
+            lineWidth: 1,
+            lineStyle: 2,
+            axisLabelVisible: true,
+            title: 'Fib 0.705 (OTE)'
+          }));
+        }
+        if (fib['0.50']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.50'],
+            color: '#64748B',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Fib 0.50 (Equilibrio)'
+          }));
+        }
+        if (fib['1.0']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['1.0'],
+            color: '#475569',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Swing High (1.0)'
+          }));
+        }
+        if (fib['0.0']) {
+          activePriceLines.push(candleSeries.createPriceLine({
+            price: fib['0.0'],
+            color: '#475569',
+            lineWidth: 1,
+            lineStyle: 3,
+            axisLabelVisible: true,
+            title: 'Swing Low (0.0)'
+          }));
+        }
+      }
+
+      if (layerOptions.orderBlocks && analysis.order_blocks) {
+        analysis.order_blocks.forEach((ob, idx) => {
+          if (ob.type === 'BULLISH') {
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.top,
+              color: '#10B981',
+              lineWidth: 1.5,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `OB Bullish #${idx+1} Top`
+            }));
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.bottom,
+              color: '#059669',
+              lineWidth: 1,
+              lineStyle: 2,
+              axisLabelVisible: true,
+              title: `OB Bullish Base`
+            }));
+            if (ob.time) {
+              markers.push({
+                time: ob.time,
+                position: 'belowBar',
+                color: '#10B981',
+                shape: 'arrowUp',
+                text: 'OB Alcista'
+              });
+            }
+          } else {
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.top,
+              color: '#E11D48',
+              lineWidth: 1,
+              lineStyle: 2,
+              axisLabelVisible: true,
+              title: `OB Bearish Top`
+            }));
+            activePriceLines.push(candleSeries.createPriceLine({
+              price: ob.bottom,
+              color: '#F43F5E',
+              lineWidth: 1.5,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `OB Bearish #${idx+1} Base`
+            }));
+            if (ob.time) {
+              markers.push({
+                time: ob.time,
+                position: 'aboveBar',
+                color: '#F43F5E',
+                shape: 'arrowDown',
+                text: 'OB Bajista'
+              });
+            }
+          }
+        });
+      }
+
+      if (layerOptions.fvgs && analysis.fvgs) {
+        analysis.fvgs.forEach((fvg) => {
+          if (fvg.time) {
+            markers.push({
+              time: fvg.time,
+              position: fvg.type === 'BULLISH' ? 'belowBar' : 'aboveBar',
+              color: fvg.type === 'BULLISH' ? '#06B6D4' : '#F97316',
+              shape: 'circle',
+              text: `FVG ${fvg.type === 'BULLISH' ? 'Alcista' : 'Bajista'}`
+            });
+          }
+        });
+      }
+
+      markers.sort((a, b) => a.time - b.time);
+      candleSeries.setMarkers(markers);
+
+      if (analysis.trend) {
+        smaSeries.applyOptions({
+          color: analysis.trend === 'BULLISH' ? '#10B981' : '#F43F5E'
+        });
+      }
+
+      drawSMCOverlayCanvas();
+      updateDataTables(analysis);
+    }
+
+    function drawSMCOverlayCanvas() {
+      const canvas = document.getElementById('smcOverlayCanvas');
+      if (!canvas || !chart || !candleSeries || !currentAnalysis) return;
+
+      const container = document.getElementById('chartContainer');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w === 0 || h === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      if (!layerOptions.zones) return;
+
+      const timeScale = chart.timeScale();
+      const plotWidth = timeScale.width();
+      const ans = currentAnalysis;
+
+      if (layerOptions.fibonacci && ans.fib_levels && ans.fib_levels['0.618'] && ans.fib_levels['0.705']) {
+        const y618 = candleSeries.priceToCoordinate(ans.fib_levels['0.618']);
+        const y705 = candleSeries.priceToCoordinate(ans.fib_levels['0.705']);
+        if (y618 !== null && y705 !== null) {
+          const y = Math.min(y618, y705);
+          const boxH = Math.max(Math.abs(y705 - y618), 3);
+
+          const grad = ctx.createLinearGradient(0, y, plotWidth, y);
+          grad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
+          grad.addColorStop(1, 'rgba(245, 158, 11, 0.04)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, y, plotWidth, boxH);
+
+          ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(0, y, plotWidth, boxH);
+          ctx.setLineDash([]);
+
+          ctx.fillStyle = 'rgba(245, 158, 11, 0.9)';
+          ctx.font = 'bold 10px "JetBrains Mono", monospace';
+          ctx.fillText('★ GOLDEN POCKET FIBONACCI (0.618 - 0.705)', 12, y + 14);
+        }
+      }
+
+      if (layerOptions.orderBlocks && ans.order_blocks) {
+        ans.order_blocks.forEach((ob) => {
+          const yTop = candleSeries.priceToCoordinate(ob.top);
+          const yBottom = candleSeries.priceToCoordinate(ob.bottom);
+
+          if (yTop !== null && yBottom !== null) {
+            let xStart = timeScale.timeToCoordinate(ob.time);
+            if (xStart === null || xStart < 0) xStart = 0;
+            const boxW = Math.max(plotWidth - xStart, 40);
+            const y = Math.min(yTop, yBottom);
+            const boxH = Math.max(Math.abs(yBottom - yTop), 3);
+
+            if (ob.type === 'BULLISH') {
+              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+              grad.addColorStop(0, 'rgba(16, 185, 129, 0.22)');
+              grad.addColorStop(1, 'rgba(16, 185, 129, 0.04)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(xStart, y, boxW, boxH);
+
+              ctx.strokeStyle = 'rgba(16, 185, 129, 0.75)';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([3, 3]);
+              ctx.strokeRect(xStart, y, boxW, boxH);
+              ctx.setLineDash([]);
+
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.95)';
+              ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              ctx.fillText(`BULLISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
+            } else {
+              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+              grad.addColorStop(0, 'rgba(244, 63, 94, 0.22)');
+              grad.addColorStop(1, 'rgba(244, 63, 94, 0.04)');
+              ctx.fillStyle = grad;
+              ctx.fillRect(xStart, y, boxW, boxH);
+
+              ctx.strokeStyle = 'rgba(244, 63, 94, 0.75)';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([3, 3]);
+              ctx.strokeRect(xStart, y, boxW, boxH);
+              ctx.setLineDash([]);
+
+              ctx.fillStyle = 'rgba(244, 63, 94, 0.95)';
+              ctx.font = 'bold 9px "JetBrains Mono", monospace';
+              ctx.fillText(`BEARISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
+            }
+          }
+        });
+      }
+
+      if (layerOptions.fvgs && ans.fvgs) {
+        ans.fvgs.forEach((fvg) => {
+          const yTop = candleSeries.priceToCoordinate(fvg.top);
+          const yBottom = candleSeries.priceToCoordinate(fvg.bottom);
+
+          if (yTop !== null && yBottom !== null) {
+            let xStart = timeScale.timeToCoordinate(fvg.time);
+            if (xStart === null || xStart < 0) xStart = 0;
+            const boxW = Math.max(plotWidth - xStart, 30);
+            const y = Math.min(yTop, yBottom);
+            const boxH = Math.max(Math.abs(yBottom - yTop), 2);
+
+            const isBull = fvg.type === 'BULLISH';
+            const colorRgb = isBull ? '6, 182, 212' : '249, 115, 22';
+
+            const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
+            grad.addColorStop(0, `rgba(${colorRgb}, 0.16)`);
+            grad.addColorStop(1, `rgba(${colorRgb}, 0.03)`);
+            ctx.fillStyle = grad;
+            ctx.fillRect(xStart, y, boxW, boxH);
+
+            ctx.strokeStyle = `rgba(${colorRgb}, 0.7)`;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 3]);
+            ctx.strokeRect(xStart, y, boxW, boxH);
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = `rgba(${colorRgb}, 0.9)`;
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.fillText(`FVG GAP  $${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}`, xStart + 8, y + 11);
+          }
+        });
+      }
+    }
+
+    function updateDataTables(ans) {
+      if (!ans) return;
+
+      const obList = document.getElementById('obList');
+      const obCount = document.getElementById('obCount');
+      if (obList && ans.order_blocks) {
+        obCount.innerText = `${ans.order_blocks.length} zonas`;
+        if (ans.order_blocks.length === 0) {
+          obList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin Order Blocks activos en 15m.</div>';
+        } else {
+          obList.innerHTML = '';
+          ans.order_blocks.forEach((ob, i) => {
+            const isBull = ob.type === 'BULLISH';
+            const badgeClass = isBull ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${ob.type}</span>
+                <span class="text-white font-bold">$${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">Δ $${(ob.top - ob.bottom).toFixed(2)}</span>
+            `;
+            obList.appendChild(div);
+          });
+        }
+      }
+
+      const fvgList = document.getElementById('fvgList');
+      const fvgCount = document.getElementById('fvgCount');
+      if (fvgList && ans.fvgs) {
+        fvgCount.innerText = `${ans.fvgs.length} zonas`;
+        if (ans.fvgs.length === 0) {
+          fvgList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin FVGs activos.</div>';
+        } else {
+          fvgList.innerHTML = '';
+          ans.fvgs.forEach((fvg) => {
+            const isBull = fvg.type === 'BULLISH';
+            const badgeClass = isBull ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${fvg.type}</span>
+                <span class="text-slate-200 font-semibold">$${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}</span>
+              </div>
+              <span class="text-slate-400 text-[11px]">Gap: $${(fvg.top - fvg.bottom).toFixed(2)}</span>
+            `;
+            fvgList.appendChild(div);
+          });
+        }
+      }
+
+      if (ans.fib_levels) {
+        const fib = ans.fib_levels;
+        if (fib['1.0']) document.getElementById('fib100').innerText = `$${fib['1.0'].toFixed(2)}`;
+        if (fib['0.705']) document.getElementById('fib705').innerText = `$${fib['0.705'].toFixed(2)}`;
+        if (fib['0.618']) document.getElementById('fib618').innerText = `$${fib['0.618'].toFixed(2)}`;
+        if (fib['0.50']) document.getElementById('fib50').innerText = `$${fib['0.50'].toFixed(2)}`;
+        if (fib['0.0']) document.getElementById('fib0').innerText = `$${fib['0.0'].toFixed(2)}`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      connectWebSocket();
+    });
+  </script>
+</body>
+</html>

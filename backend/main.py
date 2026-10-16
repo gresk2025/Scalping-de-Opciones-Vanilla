@@ -192,6 +192,16 @@ async def serve_index(request: Request):
         return FileResponse(index_file)
     return {"message": "Frontend no encontrado."}
 
+@app.get("/grafico")
+@app.get("/chart")
+async def serve_chart(request: Request):
+    if not is_user_authenticated(request):
+        return RedirectResponse(url="/login")
+    chart_file = FRONTEND_DIR / "chart.html"
+    if chart_file.exists():
+        return FileResponse(chart_file)
+    return {"message": "Módulo de gráfico no encontrado."}
+
 @app.get("/api/state")
 async def get_state(request: Request):
     if not is_user_authenticated(request):

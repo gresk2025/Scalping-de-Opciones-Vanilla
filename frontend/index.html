@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -6,7 +6,7 @@
   <title>Scalping de Opciones Vanilla | SOL/USDT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
   <script>
@@ -36,7 +36,7 @@
   </script>
   <style>
     body { background-color: #080B11; color: #E2E8F0; }
-    .glass-panel { background: rgba(15, 23, 42, 0.70); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.45); }
+    .glass-panel { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.4); }
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
@@ -44,18 +44,15 @@
     .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-accent selection:text-white pb-12">
 
-  <!-- Banner de Modo de Operación -->
-  <div id="modeBanner" class="w-full py-2 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50">
+  <div id="modeBanner" class="w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50">
+    <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
     <span id="modeBannerText">🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)</span>
   </div>
 
-  <!-- Header Superior con Navegación y Controles -->
-  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      
-      <!-- Logo y Título -->
+  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,28 +60,15 @@
           </svg>
         </div>
         <div>
-          <h1 class="text-sm md:text-base font-bold tracking-tight text-white flex items-center gap-2">
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
             Scalping Opciones Vanilla
             <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">SOL / USDT</span>
           </h1>
-          <p class="text-[11px] text-slate-400">Estrategia Smart Money Concepts (OB + FVG + Fib 0.618)</p>
+          <p class="text-xs text-slate-400">Estrategia Smart Money Concepts (OB + FVG + Fib 0.618)</p>
         </div>
       </div>
 
-      <!-- Selector de Vistas / Pestañas (Apartados) -->
-      <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 shadow-inner">
-        <button id="tabDashboard" onclick="switchView('dashboard')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-          <span>Panel General</span>
-        </button>
-        <button id="tabTerminal" onclick="switchView('terminal')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-          <span class="flex items-center gap-1">Terminal Gráfico SMC Pro <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span></span>
-        </button>
-      </div>
-
-      <!-- Acciones y Perfil -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2.5">
         <div id="botStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="botStatusText">ACTIVO</span>
@@ -99,18 +83,21 @@
           <span id="pauseBtnText">Pausar</span>
         </button>
 
-        <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Configurar API de Binance">
+        <a href="/grafico" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-md shadow-indigo-600/30" title="Abrir Módulo de Gráfico con Dibujos SMC">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          <span>Módulo Gráfico SMC ↗</span>
+        </a>
+
+        <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          <span class="hidden md:inline">Configurar API</span>
+          <span>Configurar API</span>
         </button>
 
-        <!-- Botón Usuario y Clave -->
         <button onclick="openCredentialsModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Cambiar usuario o contraseña">
           <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
           <span id="navUsername">admin</span>
         </button>
 
-        <!-- Botón Cerrar Sesión -->
         <button onclick="handleLogout()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition flex items-center gap-1" title="Cerrar Sesión">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
         </button>
@@ -118,447 +105,261 @@
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5 w-full pb-10">
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5 w-full">
 
-    <!-- ========================================================================= -->
-    <!-- VISTA 1: PANEL GENERAL (DASHBOARD COMPLETO) -->
-    <!-- ========================================================================= -->
-    <div id="viewDashboard" class="flex flex-col gap-5 w-full">
-      
-      <!-- Fila de KPIs Principales -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
-        <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Precio SOL</span>
-            <span id="wsStatusDot" class="w-2 h-2 rounded-full bg-emerald-400" title="WebSocket Conectado"></span>
-          </div>
-          <div class="mt-1">
-            <div id="solPrice" class="text-xl md:text-2xl font-bold font-mono text-white transition-colors duration-200">$0.00</div>
-            <div id="solChange" class="text-xs font-mono text-emerald-400 font-semibold">+0.00%</div>
-          </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Precio SOL</span>
+          <span id="wsStatusDot" class="w-2 h-2 rounded-full bg-emerald-400" title="WebSocket Conectado"></span>
         </div>
-
-        <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>PnL Hoy</span>
-            <span class="text-[10px] text-amber-400/80">Límite -$5.00</span>
-          </div>
-          <div class="mt-1">
-            <div id="pnlToday" class="text-xl md:text-2xl font-bold font-mono text-slate-200">$0.00</div>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1.5 overflow-hidden">
-              <div id="pnlRiskBar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
-            </div>
-          </div>
+        <div class="mt-1">
+          <div id="solPrice" class="text-xl md:text-2xl font-bold font-mono text-white transition-colors duration-200">$0.00</div>
+          <div id="solChange" class="text-xs font-mono text-emerald-400 font-semibold">+0.00%</div>
         </div>
+      </div>
 
-        <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
-          <div class="text-xs text-slate-400">PnL Total Acumulado</div>
-          <div class="mt-1">
-            <div id="pnlTotal" class="text-xl md:text-2xl font-bold font-mono text-white">$0.00</div>
-            <div id="tradesCount" class="text-xs text-slate-400 font-mono">0 operaciones</div>
-          </div>
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>PnL Hoy</span>
+          <span class="text-[10px] text-amber-400/80">Límite -$5.00</span>
         </div>
-
-        <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
-          <div class="text-xs text-slate-400">Tasa de Acierto</div>
-          <div class="mt-1">
-            <div id="winRate" class="text-xl md:text-2xl font-bold font-mono text-indigo-400">0.0%</div>
-            <div id="winLossRatio" class="text-xs text-slate-400 font-mono">0W - 0L</div>
-          </div>
-        </div>
-
-        <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between col-span-2 md:col-span-1">
-          <div class="text-xs text-slate-400">Gestión de Riesgo</div>
-          <div class="mt-1">
-            <div id="contractsCountLabel" class="text-base font-bold text-white">5 Contratos</div>
-            <div class="text-[11px] text-slate-400">Capital por trade: ~$4 - $5</div>
+        <div class="mt-1">
+          <div id="pnlToday" class="text-xl md:text-2xl font-bold font-mono text-slate-200">$0.00</div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div id="pnlRiskBar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
           </div>
         </div>
       </div>
 
-      <!-- Cuadrícula Gráfico + Cerebro SMC & Posición Activa -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- Tarjeta del Gráfico en Panel General -->
-        <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-              <h2 class="text-sm font-bold text-white">Gráfico en Vivo (Velas 15M)</h2>
-              <span class="text-xs text-slate-400 font-mono">SOL/USDT</span>
-            </div>
-            
-            <div class="flex items-center gap-2 text-xs font-mono">
-              <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">■ Bullish OB</span>
-              <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">■ Bearish OB</span>
-              <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">■ Fib 0.618</span>
-
-              <!-- Botón para expandir al terminal dedicado -->
-              <button onclick="switchView('terminal')" class="ml-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 transition flex items-center gap-1 shadow-sm" title="Abrir apartado dedicado a pantalla completa">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                <span>Terminal Pro ⛶</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Slot donde se ubica el contenedor del gráfico en Dashboard -->
-          <div id="chartSlotDashboard" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-950/80 relative">
-            <!-- El elemento #chartContainer se monta aquí dinámicamente -->
-            <div id="chartContainer" class="w-full h-full relative">
-              <canvas id="smcOverlayCanvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
-              
-              <!-- HUD Flotante en el Gráfico -->
-              <div id="chartFloatingHUD" class="absolute top-2.5 left-2.5 z-20 glass-panel px-3 py-1.5 rounded-lg text-[11px] font-mono pointer-events-none border border-slate-700/60 flex items-center gap-2.5 shadow-lg">
-                <span class="text-white font-bold" id="hudSolPrice">$0.00</span>
-                <span class="text-slate-500">|</span>
-                <span id="hudTrendBadge" class="text-emerald-400 font-semibold">TREND: BULLISH</span>
-                <span class="text-slate-500">|</span>
-                <span id="hudConfluenceBadge" class="text-indigo-400 font-semibold">SMC: 40%</span>
-              </div>
-
-              <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-30 text-xs text-slate-400">
-                Conectando con Binance WebSocket y cargando velas 15M...
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Columna Derecha: Cerebro SMC y Posición Activa -->
-        <div class="flex flex-col gap-4">
-          
-          <!-- Tarjeta Cerebro SMC -->
-          <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
-            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                Cerebro SMC & Confluencias
-              </h3>
-              <div id="confluenceBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                0%
-              </div>
-            </div>
-
-            <div>
-              <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                <span>Nivel de Confluencia Institucional</span>
-                <span id="confluenceThreshold">Umbral mínimo: 65%</span>
-              </div>
-              <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
-                <div id="confluenceBar" class="h-full bg-gradient-to-r from-slate-600 via-indigo-500 to-emerald-400 transition-all duration-500 w-0"></div>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
-              <div class="text-[11px] font-semibold text-slate-400 mb-1">Análisis Técnico en Tiempo Real:</div>
-              <p id="smcRationale" class="text-xs text-slate-200 leading-relaxed">
-                Analizando estructura de mercado y esperando confluencia en temporalidad 15M...
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
-              <div id="tagOB" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Order Blocks
-              </div>
-              <div id="tagFVG" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> FVG Imbalances
-              </div>
-              <div id="tagFib" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Fib 0.618 / 0.705
-              </div>
-              <div id="tagTrend" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Estructura
-              </div>
-            </div>
-          </div>
-
-          <!-- Tarjeta Posición Activa -->
-          <div id="activeTradeCard" class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Operación en Curso</span>
-              <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                CALL
-              </span>
-            </div>
-
-            <div id="noActiveTradeMsg" class="py-6 text-center text-xs text-slate-400">
-              <span class="inline-block animate-pulse mb-1 text-slate-500 text-lg">📡</span>
-              <p>Sin operaciones abiertas actualmente.</p>
-              <p class="text-[11px] text-slate-400 mt-1">El bot gatillará una opción al detectar confluencia ≥ 65%.</p>
-            </div>
-
-            <div id="activeTradeDetails" class="hidden flex flex-col gap-3">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400">Contrato:</span>
-                <span id="activeSymbol" class="font-mono font-bold text-white">SOL-C-108</span>
-              </div>
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400">Contratos:</span>
-                <span id="activeContracts" class="font-mono text-slate-200">5</span>
-              </div>
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400">Prima Entrada:</span>
-                <span id="activeEntryPremium" class="font-mono text-slate-200">$0.00</span>
-              </div>
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400">Prima Actual:</span>
-                <span id="activeCurrentPremium" class="font-mono font-semibold text-white">$0.00</span>
-              </div>
-              <div class="border-t border-slate-800 pt-2 flex justify-between items-center">
-                <span class="text-xs font-semibold text-slate-300">PnL No Realizado:</span>
-                <div class="text-right">
-                  <div id="activeLivePnl" class="text-lg font-bold font-mono text-emerald-400">+$0.00</div>
-                  <div id="activeLivePnlPct" class="text-xs font-mono font-semibold text-emerald-400">+0.0%</div>
-                </div>
-              </div>
-
-              <!-- Tiempo transcurrido vs Decay -->
-              <div class="text-[11px] flex justify-between text-slate-400 pt-1">
-                <span>Tiempo transcurrido:</span>
-                <span id="activeElapsedTimer" class="font-mono text-amber-300">0m / 90m</span>
-              </div>
-
-              <button onclick="closeActiveTradeManual()" class="w-full mt-1 py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 transition">
-                Cerrar Operación Manualmente (Mercado)
-              </button>
-            </div>
-          </div>
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="text-xs text-slate-400">PnL Total Acumulado</div>
+        <div class="mt-1">
+          <div id="pnlTotal" class="text-xl md:text-2xl font-bold font-mono text-white">$0.00</div>
+          <div id="tradesCount" class="text-xs text-slate-400 font-mono">0 operaciones</div>
         </div>
       </div>
 
-      <!-- Historial de Operaciones y Logs en Vivo -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- Tabla de Historial -->
-        <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-              Historial de Operaciones
-            </h3>
-            <span class="text-[11px] text-slate-400">Últimas 50 operaciones</span>
-          </div>
-
-          <div class="overflow-x-auto custom-scroll max-h-[300px]">
-            <table class="w-full text-left text-xs">
-              <thead class="text-[11px] uppercase text-slate-400 border-b border-slate-800 sticky top-0 bg-slate-900/90 backdrop-blur-sm">
-                <tr>
-                  <th class="py-2.5 px-3">Cierre</th>
-                  <th class="py-2.5 px-3">Tipo</th>
-                  <th class="py-2.5 px-3">Strike</th>
-                  <th class="py-2.5 px-3">Contratos</th>
-                  <th class="py-2.5 px-3">PnL ($ / %)</th>
-                  <th class="py-2.5 px-3">Motivo</th>
-                  <th class="py-2.5 px-3">Modo</th>
-                </tr>
-              </thead>
-              <tbody id="tradesTableBody" class="divide-y divide-slate-800/60 font-mono text-xs">
-                <tr><td colspan="7" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td></tr>
-              </tbody>
-            </table>
-          </div>
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="text-xs text-slate-400">Tasa de Acierto</div>
+        <div class="mt-1">
+          <div id="winRate" class="text-xl md:text-2xl font-bold font-mono text-indigo-400">0.0%</div>
+          <div id="winLossRatio" class="text-xs text-slate-400 font-mono">0W - 0L</div>
         </div>
+      </div>
 
-        <!-- Registro de Actividad en Vivo -->
-        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              Registro de Actividad en Vivo
-            </h3>
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          </div>
-
-          <div id="terminalLog" class="bg-slate-950/90 rounded-xl p-3 font-mono text-[11px] text-slate-300 h-[260px] overflow-y-auto custom-scroll flex flex-col gap-1.5 border border-slate-800/60">
-            <!-- Inyectado dinámicamente -->
-          </div>
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between col-span-2 md:col-span-1">
+        <div class="text-xs text-slate-400">Gestión de Riesgo</div>
+        <div class="mt-1">
+          <div id="contractsCountLabel" class="text-base font-bold text-white">5 Contratos</div>
+          <div class="text-[11px] text-slate-400">Capital por trade: ~$4 - $5</div>
         </div>
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- VISTA 2: APARTADO SOLO PARA EL GRÁFICO (TERMINAL GRÁFICO SMC PRO) -->
-    <!-- ========================================================================= -->
-    <div id="viewTerminal" class="hidden flex flex-col gap-4 w-full">
-      
-      <!-- Barra Superior de Herramientas y Filtros de Capas SMC -->
-      <div class="glass-panel rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
-        
-        <!-- Info y Botón Volver -->
-        <div class="flex items-center flex-wrap gap-2.5">
-          <button onclick="switchView('dashboard')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
-            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            <span>Volver al Panel</span>
-          </button>
-
-          <div class="h-5 w-[1px] bg-slate-800 hidden sm:block"></div>
-
-          <!-- Ticker y Status en el Terminal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
           <div class="flex items-center gap-2">
-            <span class="font-bold text-sm text-white font-mono" id="termSolPrice">$0.00</span>
-            <span class="text-xs font-mono font-semibold" id="termSolChange">+0.00%</span>
-            <span id="termTrendBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">BULLISH</span>
-            <span id="termConfluenceBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold">40% Confluencia</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+            <h2 class="text-sm font-bold text-white">Gráfico en Vivo (Velas 15M)</h2>
+            <span class="text-xs text-slate-400 font-mono">SOL/USDT</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">■ Bullish OB</span>
+            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">■ Bearish OB</span>
+            <a href="/grafico" class="ml-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 transition flex items-center gap-1 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+              <span>Ver con Dibujos SMC</span>
+            </a>
           </div>
         </div>
 
-        <!-- Capas Visuales SMC (Toggles Interactivos Dibujados en el Gráfico) -->
-        <div class="flex items-center flex-wrap gap-1.5 text-xs font-mono">
-          <span class="text-[11px] text-slate-400 mr-1 hidden lg:inline font-sans font-semibold">Capas SMC:</span>
-          
-          <button id="btnLayerOB" onclick="toggleLayer('orderBlocks')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-700/60 transition flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span>Order Blocks</span>
-          </button>
-
-          <button id="btnLayerFVG" onclick="toggleLayer('fvgs')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-cyan-950/70 text-cyan-300 border border-cyan-700/60 transition flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-            <span>FVG Imbalances</span>
-          </button>
-
-          <button id="btnLayerFib" onclick="toggleLayer('fibonacci')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-950/70 text-amber-300 border border-amber-700/60 transition flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span>Fib 0.618 / 0.705</span>
-          </button>
-
-          <button id="btnLayerSMA" onclick="toggleLayer('sma')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 transition flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
-            <span>Tendencia (SMA 20)</span>
-          </button>
-
-          <button id="btnLayerZones" onclick="toggleLayer('zones')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-violet-950/70 text-violet-300 border border-violet-700/60 transition flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-violet-400"></span>
-            <span>Zonas Sombreadas</span>
-          </button>
+        <div id="chartContainer" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-950/80 relative">
+          <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-xs text-slate-400">
+            Conectando con Binance WebSocket y cargando velas...
+          </div>
         </div>
       </div>
 
-      <!-- Slot Principal del Gráfico a Pantalla Completa (620px de Altura) -->
-      <div id="chartSlotTerminal" class="w-full h-[620px] rounded-2xl overflow-hidden bg-slate-950/90 relative border border-slate-800/80 shadow-2xl">
-        <!-- El elemento #chartContainer se moverá aquí al entrar al terminal -->
-      </div>
+      <div class="flex flex-col gap-4">
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+              Cerebro SMC & Confluencias
+            </h3>
+            <div id="confluenceBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+              0%
+            </div>
+          </div>
 
-      <!-- Mesa de Datos Cuantitativos de Smart Money Concepts -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
-        <!-- Card 1: Order Blocks Activos -->
-        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Nivel de Confluencia Institucional</span>
+              <span id="confluenceThreshold">Umbral mínimo: 70%</span>
+            </div>
+            <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+              <div id="confluenceBar" class="h-full bg-gradient-to-r from-slate-600 via-indigo-500 to-emerald-400 transition-all duration-500 w-0"></div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
+            <div class="text-[11px] font-semibold text-slate-400 mb-1">Análisis Técnico en Tiempo Real:</div>
+            <p id="smcRationale" class="text-xs text-slate-200 leading-relaxed">
+              Analizando estructura de mercado y esperando confluencia en temporalidad 15M...
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div id="tagOB" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Order Blocks
+            </div>
+            <div id="tagFVG" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> FVG Imbalances
+            </div>
+            <div id="tagFib" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Fib 0.618 / 0.705
+            </div>
+            <div id="tagTrend" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Estructura
+            </div>
+          </div>
+        </div>
+
+        <div id="activeTradeCard" class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30">
           <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <h4 class="text-xs font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Order Blocks Detectados (OB)
-            </h4>
-            <span id="termObCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">0 zonas</span>
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Operación en Curso</span>
+            <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              CALL
+            </span>
           </div>
-          <div id="termObList" class="flex flex-col gap-2 overflow-y-auto max-h-[180px] custom-scroll text-xs font-mono">
-            <div class="text-slate-500 py-3 text-center">Cargando Order Blocks...</div>
-          </div>
-        </div>
 
-        <!-- Card 2: Fair Value Gaps Activos -->
-        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <h4 class="text-xs font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-              Fair Value Gaps (FVG Imbalance)
-            </h4>
-            <span id="termFvgCount" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">0 zonas</span>
+          <div id="noActiveTradeMsg" class="py-6 text-center text-xs text-slate-400">
+            <span class="inline-block animate-pulse mb-1 text-slate-500 text-lg">📡</span>
+            <p>No hay operación abierta en este momento.</p>
+            <p class="text-[11px] text-slate-500 mt-1">El bot abrirá contrato automáticamente al confluir la señal.</p>
           </div>
-          <div id="termFvgList" class="flex flex-col gap-2 overflow-y-auto max-h-[180px] custom-scroll text-xs font-mono">
-            <div class="text-slate-500 py-3 text-center">Cargando FVGs...</div>
-          </div>
-        </div>
 
-        <!-- Card 3: Niveles de Retroceso Fibonacci -->
-        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2.5">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <h4 class="text-xs font-bold text-white flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-              Niveles Clave de Fibonacci
-            </h4>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Swing 30 Velas</span>
-          </div>
-          <div id="termFibList" class="flex flex-col gap-1.5 text-xs font-mono">
-            <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-slate-400">
-              <span>Swing High (1.0)</span>
-              <span id="fib100" class="text-white font-bold">$0.00</span>
+          <div id="activeTradeDetails" class="hidden flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div id="activeSymbol" class="text-sm font-bold text-white font-mono">SOL-P-100</div>
+                <div class="text-[11px] text-slate-400"><span id="activeContracts">5</span> contratos</div>
+              </div>
+              <div class="text-right">
+                <div id="activeLivePnl" class="text-lg font-bold font-mono text-emerald-400">+$0.00</div>
+                <div id="activeLivePnlPct" class="text-xs font-mono text-emerald-400 font-semibold">+0.0%</div>
+              </div>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-amber-300 font-semibold bg-amber-500/5 px-1 rounded">
-              <span>★ OTE (0.705)</span>
-              <span id="fib705" class="text-amber-300 font-bold">$0.00</span>
+
+            <div class="grid grid-cols-2 gap-2 text-xs p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 font-mono">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Prima Entrada:</span>
+                <span id="activeEntryPremium" class="text-slate-200 font-semibold">$0.00</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Prima Actual:</span>
+                <span id="activeCurrentPremium" class="text-slate-200 font-semibold">$0.00</span>
+              </div>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-amber-400 font-bold bg-amber-500/10 px-1 rounded">
-              <span>★ Golden Pocket (0.618)</span>
-              <span id="fib618" class="text-amber-400 font-bold">$0.00</span>
+
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+              <span>Tiempo en mercado:</span>
+              <span id="activeElapsedTimer" class="text-amber-400 font-bold">0m / 90m</span>
             </div>
-            <div class="flex justify-between items-center py-1 border-b border-slate-800/40 text-slate-400">
-              <span>Equilibrio (0.50)</span>
-              <span id="fib50" class="text-slate-200">$0.00</span>
-            </div>
-            <div class="flex justify-between items-center py-1 text-slate-400">
-              <span>Swing Low (0.0)</span>
-              <span id="fib0" class="text-white font-bold">$0.00</span>
-            </div>
+
+            <button onclick="closeActiveTradeManual()" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
+              Cerrar Operación Inmediatamente
+            </button>
           </div>
         </div>
 
       </div>
+    </div>
 
-      <!-- Tarjeta Explicativa de Estrategia Institucional -->
-      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-2">
-        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          Interpretación del Motor Cuantitativo SMC en el Gráfico
-        </h4>
-        <p class="text-xs text-slate-300 leading-relaxed">
-          Las <strong>cajas verdes y rojas</strong> representan zonas donde las instituciones inyectaron capital agresivo provocando un quiebre de estructura (BOS). Las <strong>cajas cian y naranja</strong> representan imbalances o vacíos de liquidez (FVG) que el precio tiende a mitigar. Cuando el precio de SOL retrocede y confluye con el <strong>Golden Pocket Fibonacci (0.618 - 0.705)</strong> dentro de un Order Block a favor de la tendencia (SMA 20), el bot dispara automáticamente la compra de la opción Vanilla.
-        </p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Historial de Operaciones
+          </h3>
+          <span class="text-xs text-slate-500 font-mono">Últimas 50 operaciones</span>
+        </div>
+
+        <div class="overflow-x-auto custom-scroll max-h-[260px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="text-[11px] text-slate-400 uppercase bg-slate-900/60 sticky top-0">
+              <tr>
+                <th class="py-2 px-3">Hora</th>
+                <th class="py-2 px-3">Tipo</th>
+                <th class="py-2 px-3">Strike</th>
+                <th class="py-2 px-3">Lote</th>
+                <th class="py-2 px-3">Prima Ent/Sal</th>
+                <th class="py-2 px-3">PnL Neto</th>
+                <th class="py-2 px-3">Razón</th>
+                <th class="py-2 px-3">Modo</th>
+              </tr>
+            </thead>
+            <tbody id="tradesTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+            Terminal de Logs
+          </h3>
+          <span class="text-[10px] text-slate-500 font-mono">Eventos en vivo</span>
+        </div>
+
+        <div id="terminalLog" class="p-3 rounded-xl bg-slate-950 font-mono text-[11px] h-[260px] overflow-y-auto custom-scroll flex flex-col gap-1.5 text-slate-300">
+          <div class="text-slate-500">> Sistema iniciado. Conectando...</div>
+        </div>
+      </div>
     </div>
 
   </main>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL DE CONFIGURACIÓN DE BINANCE API -->
-  <!-- ========================================================================= -->
   <div id="configModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-          Configuración de Binance API
+          <span>⚙️</span> Configuración de Binance Opciones
         </h3>
         <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">&times;</button>
       </div>
 
       <p class="text-xs text-slate-300 leading-relaxed">
-        Pega tu API Key y Secret de Binance con permisos de <strong>Lectura</strong> y <strong>Trading de Opciones Vanilla</strong>. (Nunca actives permisos de retiros).
+        Ingresa tus claves de API cuando decidas operar en <strong>Modo Real</strong>. El sistema probará la conexión y los permisos de opciones antes de guardar.
       </p>
 
       <div class="flex flex-col gap-3 text-xs">
         <div>
-          <label class="block text-slate-400 font-medium mb-1">Binance API Key:</label>
-          <input type="password" id="inputApiKey" placeholder="Pega tu API Key aquí"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+          <label class="block text-slate-300 font-semibold mb-1">Binance API Key:</label>
+          <input type="text" id="inputApiKey" placeholder="Pega tu API Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-slate-400 font-medium mb-1">Binance Secret Key:</label>
-          <input type="password" id="inputApiSecret" placeholder="Pega tu Secret Key aquí"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+          <label class="block text-slate-300 font-semibold mb-1">Binance Secret Key:</label>
+          <input type="password" id="inputApiSecret" placeholder="Pega tu Secret Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800/80">
+        <div class="grid grid-cols-2 gap-3 pt-2">
           <div>
-            <label class="block text-slate-400 font-medium mb-1">Contratos por trade:</label>
-            <input type="number" id="inputContracts" value="5" min="1" max="10"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+            <label class="block text-slate-400 text-[11px] mb-1">Lote (Contratos):</label>
+            <input type="number" id="inputContracts" min="1" max="10" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
           </div>
           <div>
-            <label class="block text-slate-400 font-medium mb-1">Pérdida Máx Diaria ($):</label>
-            <input type="number" id="inputMaxLoss" value="5.0" step="0.5" min="1.0"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
+            <label class="block text-slate-400 text-[11px] mb-1">Máx Pérdida Diaria ($):</label>
+            <input type="number" id="inputMaxLoss" min="1" max="20" step="0.5" value="5.0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
           </div>
         </div>
 
@@ -576,9 +377,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL DE CREDENCIALES Y SEGURIDAD -->
-  <!-- ========================================================================= -->
+  <!-- Modal de Credenciales y Seguridad -->
   <div id="credentialsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -632,25 +431,11 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- JAVASCRIPT DEL SISTEMA, GRÁFICO LIGHTWEIGHT CHARTS Y OVERLAYS SMC -->
-  <!-- ========================================================================= -->
   <script>
-    let chart, candleSeries, smaSeries;
+    let chart, candleSeries;
     let ws = null;
     let isPaperMode = true;
     let currentBotState = null;
-    let currentKlines = [];
-    let currentView = 'dashboard';
-    let activePriceLines = [];
-
-    const layerOptions = {
-      orderBlocks: true,
-      fvgs: true,
-      fibonacci: true,
-      sma: true,
-      zones: true
-    };
 
     function initChart() {
       const container = document.getElementById('chartContainer');
@@ -664,8 +449,8 @@
           fontFamily: '"JetBrains Mono", monospace'
         },
         grid: {
-          vertLines: { color: 'rgba(30, 41, 59, 0.45)' },
-          horzLines: { color: 'rgba(30, 41, 59, 0.45)' }
+          vertLines: { color: 'rgba(30, 41, 59, 0.5)' },
+          horzLines: { color: 'rgba(30, 41, 59, 0.5)' }
         },
         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
         rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.6)' },
@@ -681,91 +466,11 @@
         wickDownColor: '#F43F5E'
       });
 
-      smaSeries = chart.addLineSeries({
-        color: '#10B981',
-        lineWidth: 2,
-        priceLineVisible: false,
-        crosshairMarkerVisible: false,
-        title: 'SMA 20'
-      });
-
-      chart.timeScale().subscribeVisibleTimeRangeChange(() => {
-        drawSMCOverlayCanvas();
-      });
-      chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-        drawSMCOverlayCanvas();
-      });
-
       window.addEventListener('resize', () => {
-        resizeChartToSlot();
+        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
       });
 
       loadInitialKlines();
-    }
-
-    function resizeChartToSlot() {
-      const slot = currentView === 'terminal' 
-        ? document.getElementById('chartSlotTerminal') 
-        : document.getElementById('chartSlotDashboard');
-      if (chart && slot) {
-        chart.applyOptions({ width: slot.clientWidth, height: slot.clientHeight });
-        drawSMCOverlayCanvas();
-      }
-    }
-
-    function switchView(viewName) {
-      currentView = viewName;
-      const viewDash = document.getElementById('viewDashboard');
-      const viewTerm = document.getElementById('viewTerminal');
-      const tabDash = document.getElementById('tabDashboard');
-      const tabTerm = document.getElementById('tabTerminal');
-      const chartEl = document.getElementById('chartContainer');
-
-      if (viewName === 'terminal') {
-        document.getElementById('chartSlotTerminal').appendChild(chartEl);
-        viewDash.classList.add('hidden');
-        viewTerm.classList.remove('hidden');
-
-        tabDash.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5';
-        tabTerm.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
-      } else {
-        document.getElementById('chartSlotDashboard').appendChild(chartEl);
-        viewTerm.classList.add('hidden');
-        viewDash.classList.remove('hidden');
-
-        tabTerm.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5';
-        tabDash.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/30';
-      }
-
-      setTimeout(() => {
-        resizeChartToSlot();
-        if (chart) chart.timeScale().fitContent();
-        if (currentBotState && currentBotState.analysis) {
-          drawSMCIndicators(currentBotState.analysis);
-        }
-      }, 50);
-    }
-
-    function toggleLayer(layerName) {
-      layerOptions[layerName] = !layerOptions[layerName];
-      const btnMap = {
-        orderBlocks: 'btnLayerOB',
-        fvgs: 'btnLayerFVG',
-        fibonacci: 'btnLayerFib',
-        sma: 'btnLayerSMA',
-        zones: 'btnLayerZones'
-      };
-      const btn = document.getElementById(btnMap[layerName]);
-      if (btn) {
-        if (layerOptions[layerName]) {
-          btn.classList.remove('opacity-40', 'line-through');
-        } else {
-          btn.classList.add('opacity-40', 'line-through');
-        }
-      }
-      if (currentBotState && currentBotState.analysis) {
-        drawSMCIndicators(currentBotState.analysis);
-      }
     }
 
     async function loadInitialKlines() {
@@ -774,36 +479,12 @@
         if (res.ok) {
           const klines = await res.json();
           if (klines && klines.length > 0) {
-            currentKlines = klines;
             candleSeries.setData(klines);
-            updateSMA(klines);
             document.getElementById('chartLoading').classList.add('hidden');
-            if (chart) chart.timeScale().fitContent();
           }
         }
       } catch (e) {
         console.error('Error cargando klines:', e);
-      }
-    }
-
-    function calculateSMA(klines, period = 20) {
-      const result = [];
-      for (let i = period - 1; i < klines.length; i++) {
-        let sum = 0;
-        for (let j = 0; j < period; j++) {
-          sum += klines[i - j].close;
-        }
-        result.push({ time: klines[i].time, value: sum / period });
-      }
-      return result;
-    }
-
-    function updateSMA(klines) {
-      if (layerOptions.sma && klines.length >= 20) {
-        const smaData = calculateSMA(klines, 20);
-        smaSeries.setData(smaData);
-      } else {
-        smaSeries.setData([]);
       }
     }
 
@@ -830,353 +511,6 @@
       ws.onerror = () => { ws.close(); };
     }
 
-    function drawSMCIndicators(analysis) {
-      if (!analysis || !candleSeries) return;
-
-      activePriceLines.forEach(pl => {
-        try { candleSeries.removePriceLine(pl); } catch (e) {}
-      });
-      activePriceLines = [];
-
-      const markers = [];
-
-      if (layerOptions.fibonacci && analysis.fib_levels) {
-        const fib = analysis.fib_levels;
-        if (fib['0.618']) {
-          activePriceLines.push(candleSeries.createPriceLine({
-            price: fib['0.618'],
-            color: '#F59E0B',
-            lineWidth: 2,
-            lineStyle: 0,
-            axisLabelVisible: true,
-            title: '★ Fib 0.618 (Golden Pocket)'
-          }));
-        }
-        if (fib['0.705']) {
-          activePriceLines.push(candleSeries.createPriceLine({
-            price: fib['0.705'],
-            color: '#D97706',
-            lineWidth: 1,
-            lineStyle: 2,
-            axisLabelVisible: true,
-            title: 'Fib 0.705 (OTE)'
-          }));
-        }
-        if (fib['0.50']) {
-          activePriceLines.push(candleSeries.createPriceLine({
-            price: fib['0.50'],
-            color: '#64748B',
-            lineWidth: 1,
-            lineStyle: 3,
-            axisLabelVisible: true,
-            title: 'Fib 0.50 (Equilibrio)'
-          }));
-        }
-        if (fib['1.0']) {
-          activePriceLines.push(candleSeries.createPriceLine({
-            price: fib['1.0'],
-            color: '#475569',
-            lineWidth: 1,
-            lineStyle: 3,
-            axisLabelVisible: true,
-            title: 'Swing High (1.0)'
-          }));
-        }
-        if (fib['0.0']) {
-          activePriceLines.push(candleSeries.createPriceLine({
-            price: fib['0.0'],
-            color: '#475569',
-            lineWidth: 1,
-            lineStyle: 3,
-            axisLabelVisible: true,
-            title: 'Swing Low (0.0)'
-          }));
-        }
-      }
-
-      if (layerOptions.orderBlocks && analysis.order_blocks) {
-        analysis.order_blocks.forEach((ob, idx) => {
-          if (ob.type === 'BULLISH') {
-            activePriceLines.push(candleSeries.createPriceLine({
-              price: ob.top,
-              color: '#10B981',
-              lineWidth: 1.5,
-              lineStyle: 0,
-              axisLabelVisible: true,
-              title: `OB Bullish #${idx+1} Top`
-            }));
-            activePriceLines.push(candleSeries.createPriceLine({
-              price: ob.bottom,
-              color: '#059669',
-              lineWidth: 1,
-              lineStyle: 2,
-              axisLabelVisible: true,
-              title: `OB Bullish Base`
-            }));
-            if (ob.time) {
-              markers.push({
-                time: ob.time,
-                position: 'belowBar',
-                color: '#10B981',
-                shape: 'arrowUp',
-                text: 'OB Alcista'
-              });
-            }
-          } else {
-            activePriceLines.push(candleSeries.createPriceLine({
-              price: ob.top,
-              color: '#E11D48',
-              lineWidth: 1,
-              lineStyle: 2,
-              axisLabelVisible: true,
-              title: `OB Bearish Top`
-            }));
-            activePriceLines.push(candleSeries.createPriceLine({
-              price: ob.bottom,
-              color: '#F43F5E',
-              lineWidth: 1.5,
-              lineStyle: 0,
-              axisLabelVisible: true,
-              title: `OB Bearish #${idx+1} Base`
-            }));
-            if (ob.time) {
-              markers.push({
-                time: ob.time,
-                position: 'aboveBar',
-                color: '#F43F5E',
-                shape: 'arrowDown',
-                text: 'OB Bajista'
-              });
-            }
-          }
-        });
-      }
-
-      if (layerOptions.fvgs && analysis.fvgs) {
-        analysis.fvgs.forEach((fvg) => {
-          if (fvg.time) {
-            markers.push({
-              time: fvg.time,
-              position: fvg.type === 'BULLISH' ? 'belowBar' : 'aboveBar',
-              color: fvg.type === 'BULLISH' ? '#06B6D4' : '#F97316',
-              shape: 'circle',
-              text: `FVG ${fvg.type === 'BULLISH' ? 'Alcista' : 'Bajista'}`
-            });
-          }
-        });
-      }
-
-      markers.sort((a, b) => a.time - b.time);
-      candleSeries.setMarkers(markers);
-
-      if (analysis.trend) {
-        smaSeries.applyOptions({
-          color: analysis.trend === 'BULLISH' ? '#10B981' : '#F43F5E'
-        });
-      }
-
-      drawSMCOverlayCanvas();
-      updateTerminalDataTables(analysis);
-    }
-
-    function drawSMCOverlayCanvas() {
-      const canvas = document.getElementById('smcOverlayCanvas');
-      if (!canvas || !chart || !candleSeries || !currentBotState) return;
-
-      const container = document.getElementById('chartContainer');
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      if (w === 0 || h === 0) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
-
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, w, h);
-
-      if (!layerOptions.zones) return;
-
-      const timeScale = chart.timeScale();
-      const plotWidth = timeScale.width();
-      const ans = currentBotState.analysis;
-      if (!ans) return;
-
-      if (layerOptions.fibonacci && ans.fib_levels && ans.fib_levels['0.618'] && ans.fib_levels['0.705']) {
-        const y618 = candleSeries.priceToCoordinate(ans.fib_levels['0.618']);
-        const y705 = candleSeries.priceToCoordinate(ans.fib_levels['0.705']);
-        if (y618 !== null && y705 !== null) {
-          const y = Math.min(y618, y705);
-          const boxH = Math.max(Math.abs(y705 - y618), 3);
-
-          const grad = ctx.createLinearGradient(0, y, plotWidth, y);
-          grad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
-          grad.addColorStop(1, 'rgba(245, 158, 11, 0.04)');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, y, plotWidth, boxH);
-
-          ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([4, 4]);
-          ctx.strokeRect(0, y, plotWidth, boxH);
-          ctx.setLineDash([]);
-
-          ctx.fillStyle = 'rgba(245, 158, 11, 0.9)';
-          ctx.font = 'bold 10px "JetBrains Mono", monospace';
-          ctx.fillText('★ GOLDEN POCKET FIBONACCI (0.618 - 0.705)', 12, y + 14);
-        }
-      }
-
-      if (layerOptions.orderBlocks && ans.order_blocks) {
-        ans.order_blocks.forEach((ob) => {
-          const yTop = candleSeries.priceToCoordinate(ob.top);
-          const yBottom = candleSeries.priceToCoordinate(ob.bottom);
-
-          if (yTop !== null && yBottom !== null) {
-            let xStart = timeScale.timeToCoordinate(ob.time);
-            if (xStart === null || xStart < 0) xStart = 0;
-            const boxW = Math.max(plotWidth - xStart, 40);
-            const y = Math.min(yTop, yBottom);
-            const boxH = Math.max(Math.abs(yBottom - yTop), 3);
-
-            if (ob.type === 'BULLISH') {
-              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
-              grad.addColorStop(0, 'rgba(16, 185, 129, 0.22)');
-              grad.addColorStop(1, 'rgba(16, 185, 129, 0.04)');
-              ctx.fillStyle = grad;
-              ctx.fillRect(xStart, y, boxW, boxH);
-
-              ctx.strokeStyle = 'rgba(16, 185, 129, 0.75)';
-              ctx.lineWidth = 1;
-              ctx.setLineDash([3, 3]);
-              ctx.strokeRect(xStart, y, boxW, boxH);
-              ctx.setLineDash([]);
-
-              ctx.fillStyle = 'rgba(16, 185, 129, 0.95)';
-              ctx.font = 'bold 9px "JetBrains Mono", monospace';
-              ctx.fillText(`BULLISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
-            } else {
-              const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
-              grad.addColorStop(0, 'rgba(244, 63, 94, 0.22)');
-              grad.addColorStop(1, 'rgba(244, 63, 94, 0.04)');
-              ctx.fillStyle = grad;
-              ctx.fillRect(xStart, y, boxW, boxH);
-
-              ctx.strokeStyle = 'rgba(244, 63, 94, 0.75)';
-              ctx.lineWidth = 1;
-              ctx.setLineDash([3, 3]);
-              ctx.strokeRect(xStart, y, boxW, boxH);
-              ctx.setLineDash([]);
-
-              ctx.fillStyle = 'rgba(244, 63, 94, 0.95)';
-              ctx.font = 'bold 9px "JetBrains Mono", monospace';
-              ctx.fillText(`BEARISH OB  $${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}`, xStart + 8, y + 12);
-            }
-          }
-        });
-      }
-
-      if (layerOptions.fvgs && ans.fvgs) {
-        ans.fvgs.forEach((fvg) => {
-          const yTop = candleSeries.priceToCoordinate(fvg.top);
-          const yBottom = candleSeries.priceToCoordinate(fvg.bottom);
-
-          if (yTop !== null && yBottom !== null) {
-            let xStart = timeScale.timeToCoordinate(fvg.time);
-            if (xStart === null || xStart < 0) xStart = 0;
-            const boxW = Math.max(plotWidth - xStart, 30);
-            const y = Math.min(yTop, yBottom);
-            const boxH = Math.max(Math.abs(yBottom - yTop), 2);
-
-            const isBull = fvg.type === 'BULLISH';
-            const colorRgb = isBull ? '6, 182, 212' : '249, 115, 22';
-
-            const grad = ctx.createLinearGradient(xStart, y, plotWidth, y);
-            grad.addColorStop(0, `rgba(${colorRgb}, 0.16)`);
-            grad.addColorStop(1, `rgba(${colorRgb}, 0.03)`);
-            ctx.fillStyle = grad;
-            ctx.fillRect(xStart, y, boxW, boxH);
-
-            ctx.strokeStyle = `rgba(${colorRgb}, 0.7)`;
-            ctx.lineWidth = 1;
-            ctx.setLineDash([2, 3]);
-            ctx.strokeRect(xStart, y, boxW, boxH);
-            ctx.setLineDash([]);
-
-            ctx.fillStyle = `rgba(${colorRgb}, 0.9)`;
-            ctx.font = 'bold 9px "JetBrains Mono", monospace';
-            ctx.fillText(`FVG GAP  $${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}`, xStart + 8, y + 11);
-          }
-        });
-      }
-    }
-
-    function updateTerminalDataTables(ans) {
-      if (!ans) return;
-
-      const obList = document.getElementById('termObList');
-      const obCount = document.getElementById('termObCount');
-      if (obList && ans.order_blocks) {
-        obCount.innerText = `${ans.order_blocks.length} zonas`;
-        if (ans.order_blocks.length === 0) {
-          obList.innerHTML = '<div class="text-slate-500 py-3 text-center">Sin Order Blocks activos en 15m.</div>';
-        } else {
-          obList.innerHTML = '';
-          ans.order_blocks.forEach((ob, i) => {
-            const isBull = ob.type === 'BULLISH';
-            const badgeClass = isBull ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-            const div = document.createElement('div');
-            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
-            div.innerHTML = `
-              <div class="flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${ob.type}</span>
-                <span class="text-white font-bold">$${ob.bottom.toFixed(2)} - $${ob.top.toFixed(2)}</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">Δ $${(ob.top - ob.bottom).toFixed(2)}</span>
-            `;
-            obList.appendChild(div);
-          });
-        }
-      }
-
-      const fvgList = document.getElementById('termFvgList');
-      const fvgCount = document.getElementById('termFvgCount');
-      if (fvgList && ans.fvgs) {
-        fvgCount.innerText = `${ans.fvgs.length} zonas`;
-        if (ans.fvgs.length === 0) {
-          fvgList.innerHTML = '<div class="text-slate-500 py-3 text-center">Sin FVGs activos.</div>';
-        } else {
-          fvgList.innerHTML = '';
-          ans.fvgs.forEach((fvg) => {
-            const isBull = fvg.type === 'BULLISH';
-            const badgeClass = isBull ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20';
-            const div = document.createElement('div');
-            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
-            div.innerHTML = `
-              <div class="flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${fvg.type}</span>
-                <span class="text-slate-200 font-semibold">$${fvg.bottom.toFixed(2)} - $${fvg.top.toFixed(2)}</span>
-              </div>
-              <span class="text-slate-400 text-[11px]">Gap: $${(fvg.top - fvg.bottom).toFixed(2)}</span>
-            `;
-            fvgList.appendChild(div);
-          });
-        }
-      }
-
-      if (ans.fib_levels) {
-        const fib = ans.fib_levels;
-        if (fib['1.0']) document.getElementById('fib100').innerText = `$${fib['1.0'].toFixed(2)}`;
-        if (fib['0.705']) document.getElementById('fib705').innerText = `$${fib['0.705'].toFixed(2)}`;
-        if (fib['0.618']) document.getElementById('fib618').innerText = `$${fib['0.618'].toFixed(2)}`;
-        if (fib['0.50']) document.getElementById('fib50').innerText = `$${fib['0.50'].toFixed(2)}`;
-        if (fib['0.0']) document.getElementById('fib0').innerText = `$${fib['0.0'].toFixed(2)}`;
-      }
-    }
-
     function updateDashboard(state) {
       currentBotState = state;
       if (state.current_user) {
@@ -1187,24 +521,16 @@
       }
       isPaperMode = state.paper_trading;
 
-      if (candleSeries && state.sol_price > 0 && currentKlines.length > 0) {
-        const lastCandle = { ...currentKlines[currentKlines.length - 1] };
-        lastCandle.close = state.sol_price;
-        if (state.sol_price > lastCandle.high) lastCandle.high = state.sol_price;
-        if (state.sol_price < lastCandle.low) lastCandle.low = state.sol_price;
-        candleSeries.update(lastCandle);
-      }
-
       const banner = document.getElementById('modeBanner');
       const bannerText = document.getElementById('modeBannerText');
       const modeBtnLabel = document.getElementById('modeToggleLabel');
 
       if (isPaperMode) {
-        banner.className = 'w-full transition-all duration-300 py-2 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50';
+        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50';
         bannerText.innerHTML = '🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)';
         modeBtnLabel.innerText = 'Cambiar a Modo Real';
       } else {
-        banner.className = 'w-full transition-all duration-300 py-2 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-rose-950/90 text-rose-300 border-b border-rose-800 animate-pulse-slow';
+        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-rose-950/90 text-rose-300 border-b border-rose-800 animate-pulse-slow';
         bannerText.innerHTML = '⚠️ MODO REAL ACTIVO — DINERO EN RIESGO REAL (Conectado a Binance Vanilla Options)';
         modeBtnLabel.innerText = 'Cambiar a Simulación';
       }
@@ -1227,23 +553,15 @@
         pauseText.innerText = 'Reanudar';
       }
 
-      const priceStr = `$${state.sol_price.toFixed(2)}`;
-      document.getElementById('solPrice').innerText = priceStr;
-      document.getElementById('hudSolPrice').innerText = priceStr;
-      document.getElementById('termSolPrice').innerText = priceStr;
-
-      const chg = state.price_change_24h;
-      const chgStr = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
+      const priceEl = document.getElementById('solPrice');
+      priceEl.innerText = `$${state.sol_price.toFixed(2)}`;
       const changeEl = document.getElementById('solChange');
-      changeEl.innerText = chgStr;
+      const chg = state.price_change_24h;
+      changeEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
       changeEl.className = chg >= 0 ? 'text-xs font-mono text-emerald-400 font-semibold' : 'text-xs font-mono text-rose-400 font-semibold';
-      
-      const termChg = document.getElementById('termSolChange');
-      termChg.innerText = chgStr;
-      termChg.className = chg >= 0 ? 'text-xs font-mono text-emerald-400 font-semibold' : 'text-xs font-mono text-rose-400 font-semibold';
 
-      const dp = state.stats.daily_pnl;
       const pnlTodayEl = document.getElementById('pnlToday');
+      const dp = state.stats.daily_pnl;
       pnlTodayEl.innerText = `${dp >= 0 ? '+' : ''}$${dp.toFixed(2)}`;
       pnlTodayEl.className = `text-xl md:text-2xl font-bold font-mono ${dp >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
@@ -1265,40 +583,13 @@
       document.getElementById('confluenceBadge').innerText = `${ans.confidence}%`;
       document.getElementById('confluenceBar').style.width = `${ans.confidence}%`;
       document.getElementById('smcRationale').innerText = ans.rationale;
-      document.getElementById('hudConfluenceBadge').innerText = `SMC: ${ans.confidence}%`;
-      document.getElementById('termConfluenceBadge').innerText = `${ans.confidence}% Confluencia`;
-
-      const isBullTrend = ans.trend === 'BULLISH';
-      const hudTrend = document.getElementById('hudTrendBadge');
-      hudTrend.innerText = `TREND: ${ans.trend}`;
-      hudTrend.className = isBullTrend ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
-
-      const termTrend = document.getElementById('termTrendBadge');
-      termTrend.innerText = ans.trend;
-      termTrend.className = isBullTrend ? 'text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold' : 'text-[11px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold';
 
       const obTag = document.getElementById('tagOB');
       if (ans.order_blocks && ans.order_blocks.length > 0) {
-        obTag.className = 'p-2 rounded-lg bg-emerald-950/60 border border-emerald-700/60 text-emerald-300 flex items-center gap-1.5';
+        obTag.className = 'p-2 rounded-lg bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 flex items-center gap-1.5';
       } else {
         obTag.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
       }
-
-      const fvgTag = document.getElementById('tagFVG');
-      if (ans.fvgs && ans.fvgs.length > 0) {
-        fvgTag.className = 'p-2 rounded-lg bg-cyan-950/60 border border-cyan-700/60 text-cyan-300 flex items-center gap-1.5';
-      } else {
-        fvgTag.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
-      }
-
-      const fibTag = document.getElementById('tagFib');
-      if (ans.fib_levels && ans.fib_levels['0.618']) {
-        fibTag.className = 'p-2 rounded-lg bg-amber-950/60 border border-amber-700/60 text-amber-300 flex items-center gap-1.5';
-      } else {
-        fibTag.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
-      }
-
-      drawSMCIndicators(ans);
 
       const active = state.active_trade;
       const noTrade = document.getElementById('noActiveTradeMsg');
@@ -1342,6 +633,23 @@
       }
     }
 
+    function renderTerminalLogs(logs) {
+      const term = document.getElementById('terminalLog');
+      term.innerHTML = '';
+      logs.forEach(l => {
+        const div = document.createElement('div');
+        let color = 'text-slate-300';
+        if (l.level === 'SUCCESS') color = 'text-emerald-400';
+        if (l.level === 'WARN') color = 'text-amber-400';
+        if (l.level === 'ERROR') color = 'text-rose-400';
+
+        div.className = `${color} leading-relaxed`;
+        div.innerHTML = `<span class="text-slate-500">[${l.timestamp}]</span> <span class="font-bold">[${l.level}]</span> ${l.message}`;
+        term.appendChild(div);
+      });
+      term.scrollTop = term.scrollHeight;
+    }
+
     async function loadTradeHistory() {
       try {
         const res = await fetch('/api/history');
@@ -1349,7 +657,7 @@
           const trades = await res.json();
           const tbody = document.getElementById('tradesTableBody');
           if (trades.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td></tr>';
             return;
           }
           tbody.innerHTML = '';
@@ -1359,6 +667,7 @@
             const sign = t.pnl_usd >= 0 ? '+' : '';
             const pnlColor = t.pnl_usd >= 0 ? 'text-emerald-400' : 'text-rose-400';
             const typeColor = t.option_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
+
             const timeStr = t.exit_time ? t.exit_time.split('T')[1].substring(0, 8) : '--:--:--';
 
             tr.innerHTML = `
@@ -1366,6 +675,7 @@
               <td class="py-2.5 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${typeColor}">${t.option_type}</span></td>
               <td class="py-2.5 px-3 font-semibold text-white">$${t.strike}</td>
               <td class="py-2.5 px-3">${t.contracts}</td>
+              <td class="py-2.5 px-3 text-slate-400">$${t.entry_premium.toFixed(2)} → $${t.exit_premium ? t.exit_premium.toFixed(2) : '-'}</td>
               <td class="py-2.5 px-3 font-bold ${pnlColor}">${sign}$${t.pnl_usd ? t.pnl_usd.toFixed(2) : '0.00'} (${sign}${t.pnl_pct ? t.pnl_pct.toFixed(1) : '0'}%)</td>
               <td class="py-2.5 px-3 text-slate-400">${t.exit_reason || '-'}</td>
               <td class="py-2.5 px-3">${t.is_paper ? '<span class="text-sky-400">Paper</span>' : '<span class="text-rose-400">Real</span>'}</td>
@@ -1553,7 +863,6 @@
         window.location.href = '/login';
       }
     }
-
     window.addEventListener('DOMContentLoaded', () => {
       initChart();
       connectWebSocket();
@@ -1563,3 +872,4 @@
   </script>
 </body>
 </html>
+
