@@ -218,6 +218,7 @@ def analyze_smc(klines: List[Dict[str, Any]], current_price: float) -> Dict[str,
         "fvgs": active_fvgs,
         "fib_levels": fib_levels,
         "trend": trend,
+        "sma20": round(sma20, 2),
         "suggested_strike": suggested_strike,
         "suggested_type": suggested_type
     }
