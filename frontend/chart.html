@@ -262,6 +262,7 @@
       });
 
       loadKlines();
+      loadInitialState();
     }
 
     function toggleLayer(layerName) {
@@ -297,6 +298,16 @@
             updateSMA(klines);
             document.getElementById('chartLoading').classList.add('hidden');
             chart.timeScale().fitContent();
+
+            // Actualizar precio de inmediato con la última vela
+            const lastK = klines[klines.length - 1];
+            if (lastK && lastK.close) {
+              const pStr = `$${lastK.close.toFixed(2)}`;
+              const sEl = document.getElementById('solPrice');
+              if (sEl && (sEl.innerText === '$0.00' || !sEl.innerText)) sEl.innerText = pStr;
+              const hEl = document.getElementById('hudSolPrice');
+              if (hEl && (hEl.innerText === '$0.00' || !hEl.innerText)) hEl.innerText = pStr;
+            }
           }
         }
       } catch (e) {
@@ -322,6 +333,18 @@
         smaSeries.setData(smaData);
       } else {
         smaSeries.setData([]);
+      }
+    }
+
+    async function loadInitialState() {
+      try {
+        const res = await fetch('/api/state');
+        if (res.ok) {
+          const state = await res.json();
+          handleStateUpdate(state);
+        }
+      } catch (e) {
+        console.error('Error cargando estado inicial:', e);
       }
     }
 
@@ -558,7 +581,7 @@
       if (!layerOptions.zones) return;
 
       const timeScale = chart.timeScale();
-      const plotWidth = timeScale.width();
+      const plotWidth = Math.max(w - 65, 100);
       const ans = currentAnalysis;
 
       if (layerOptions.fibonacci && ans.fib_levels && ans.fib_levels['0.618'] && ans.fib_levels['0.705']) {

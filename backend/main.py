@@ -306,6 +306,6 @@ async def websocket_endpoint(websocket: WebSocket):
             await asyncio.sleep(1.0)
     except WebSocketDisconnect:
         pass
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"WebSocket endpoint exception: {e}")
 

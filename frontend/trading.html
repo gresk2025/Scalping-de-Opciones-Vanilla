@@ -84,17 +84,17 @@
               <span>FVGs</span>
             </button>
 
-            <button id="btnLayerFib" onclick="toggleLayer('fib')" class="px-2.5 py-1 rounded-lg font-semibold bg-amber-950/70 text-amber-300 border border-amber-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+            <button id="btnLayerFib" onclick="toggleLayer('fibonacci')" class="px-2.5 py-1 rounded-lg font-semibold bg-amber-950/70 text-amber-300 border border-amber-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
               <span class="w-2 h-2 rounded-full bg-amber-400"></span>
               <span>Fib 0.618</span>
             </button>
 
-            <button id="btnLayerTrend" onclick="toggleLayer('trend')" class="px-2.5 py-1 rounded-lg font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+            <button id="btnLayerTrend" onclick="toggleLayer('sma')" class="px-2.5 py-1 rounded-lg font-semibold bg-indigo-950/70 text-indigo-300 border border-indigo-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
               <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
               <span>SMA 20</span>
             </button>
 
-            <button id="btnLayerBoxes" onclick="toggleLayer('boxes')" class="px-2.5 py-1 rounded-lg font-semibold bg-violet-950/70 text-violet-300 border border-violet-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
+            <button id="btnLayerBoxes" onclick="toggleLayer('zones')" class="px-2.5 py-1 rounded-lg font-semibold bg-violet-950/70 text-violet-300 border border-violet-700/60 transition flex items-center gap-1.5 shadow-sm text-[11px]">
               <span class="w-2 h-2 rounded-full bg-violet-400"></span>
               <span>Cajas Sombreadas</span>
             </button>
@@ -410,6 +410,7 @@
       });
 
       loadKlines();
+      loadInitialState();
     }
 
     function toggleLayer(layerName) {
@@ -418,8 +419,8 @@
         orderBlocks: 'btnLayerOB',
         fvgs: 'btnLayerFVG',
         fibonacci: 'btnLayerFib',
-        sma: 'btnLayerSMA',
-        zones: 'btnLayerZones'
+        sma: 'btnLayerTrend',
+        zones: 'btnLayerBoxes'
       };
       const btn = document.getElementById(btnMap[layerName]);
       if (btn) {
@@ -443,8 +444,19 @@
             currentKlines = klines;
             candleSeries.setData(klines);
             updateSMA(klines);
-            document.getElementById('chartLoading').classList.add('hidden');
+            const clEl = document.getElementById('chartLoading');
+            if (clEl) clEl.classList.add('hidden');
             chart.timeScale().fitContent();
+
+            // Actualizar precio de inmediato con la última vela
+            const lastK = klines[klines.length - 1];
+            if (lastK && lastK.close) {
+              const pStr = `$${lastK.close.toFixed(2)}`;
+              const sEl = document.getElementById('solPrice');
+              if (sEl && (sEl.innerText === '$0.00' || !sEl.innerText)) sEl.innerText = pStr;
+              const hEl = document.getElementById('hudSolPrice');
+              if (hEl && (hEl.innerText === '$0.00' || !hEl.innerText)) hEl.innerText = pStr;
+            }
           }
         }
       } catch (e) {
@@ -470,6 +482,18 @@
         smaSeries.setData(smaData);
       } else {
         smaSeries.setData([]);
+      }
+    }
+
+    async function loadInitialState() {
+      try {
+        const res = await fetch('/api/state');
+        if (res.ok) {
+          const state = await res.json();
+          handleStateUpdate(state);
+        }
+      } catch (e) {
+        console.error('Error cargando estado inicial en trading:', e);
       }
     }
 
@@ -706,7 +730,7 @@
       if (!layerOptions.zones) return;
 
       const timeScale = chart.timeScale();
-      const plotWidth = timeScale.width();
+      const plotWidth = Math.max(w - 65, 100);
       const ans = currentAnalysis;
 
       if (layerOptions.fibonacci && ans.fib_levels && ans.fib_levels['0.618'] && ans.fib_levels['0.705']) {
@@ -821,19 +845,17 @@
     function updateDataTables(ans) {
       if (!ans) return;
 
-      const obList = document.getElementById('obList');
-      const obCount = document.getElementById('obCount');
-      if (obList && ans.order_blocks) {
-        obCount.innerText = `${ans.order_blocks.length} zonas`;
+      const obTable = document.getElementById('tableOrderBlocks');
+      if (obTable && ans.order_blocks) {
         if (ans.order_blocks.length === 0) {
-          obList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin Order Blocks activos en 15m.</div>';
+          obTable.innerHTML = '<div class="text-slate-500 py-3 text-center text-xs">Sin Order Blocks activos en 15m.</div>';
         } else {
-          obList.innerHTML = '';
+          obTable.innerHTML = '';
           ans.order_blocks.forEach((ob, i) => {
             const isBull = ob.type === 'BULLISH';
             const badgeClass = isBull ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
             const div = document.createElement('div');
-            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs font-mono';
             div.innerHTML = `
               <div class="flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${ob.type}</span>
@@ -841,24 +863,22 @@
               </div>
               <span class="text-slate-400 text-[11px]">Δ $${(ob.top - ob.bottom).toFixed(2)}</span>
             `;
-            obList.appendChild(div);
+            obTable.appendChild(div);
           });
         }
       }
 
-      const fvgList = document.getElementById('fvgList');
-      const fvgCount = document.getElementById('fvgCount');
-      if (fvgList && ans.fvgs) {
-        fvgCount.innerText = `${ans.fvgs.length} zonas`;
+      const fvgTable = document.getElementById('tableFVGs');
+      if (fvgTable && ans.fvgs) {
         if (ans.fvgs.length === 0) {
-          fvgList.innerHTML = '<div class="text-slate-500 py-4 text-center">Sin FVGs activos.</div>';
+          fvgTable.innerHTML = '<div class="text-slate-500 py-3 text-center text-xs">Sin FVGs activos.</div>';
         } else {
-          fvgList.innerHTML = '';
+          fvgTable.innerHTML = '';
           ans.fvgs.forEach((fvg) => {
             const isBull = fvg.type === 'BULLISH';
             const badgeClass = isBull ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20';
             const div = document.createElement('div');
-            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between';
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs font-mono';
             div.innerHTML = `
               <div class="flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeClass}">${fvg.type}</span>
@@ -866,18 +886,33 @@
               </div>
               <span class="text-slate-400 text-[11px]">Gap: $${(fvg.top - fvg.bottom).toFixed(2)}</span>
             `;
-            fvgList.appendChild(div);
+            fvgTable.appendChild(div);
           });
         }
       }
 
-      if (ans.fib_levels) {
+      const fibTable = document.getElementById('tableFibLevels');
+      if (fibTable && ans.fib_levels) {
         const fib = ans.fib_levels;
-        if (fib['1.0']) document.getElementById('fib100').innerText = `$${fib['1.0'].toFixed(2)}`;
-        if (fib['0.705']) document.getElementById('fib705').innerText = `$${fib['0.705'].toFixed(2)}`;
-        if (fib['0.618']) document.getElementById('fib618').innerText = `$${fib['0.618'].toFixed(2)}`;
-        if (fib['0.50']) document.getElementById('fib50').innerText = `$${fib['0.50'].toFixed(2)}`;
-        if (fib['0.0']) document.getElementById('fib0').innerText = `$${fib['0.0'].toFixed(2)}`;
+        fibTable.innerHTML = '';
+        const levels = [
+          { label: 'Swing High (1.0)', price: fib['1.0'], color: 'text-slate-400' },
+          { label: 'OTE (0.705)', price: fib['0.705'], color: 'text-amber-400' },
+          { label: '★ Golden Pocket (0.618)', price: fib['0.618'], color: 'text-amber-300 font-bold' },
+          { label: 'Equilibrio (0.50)', price: fib['0.50'], color: 'text-slate-300' },
+          { label: 'Swing Low (0.0)', price: fib['0.0'], color: 'text-slate-400' }
+        ];
+        levels.forEach(lvl => {
+          if (lvl.price !== undefined && lvl.price !== null) {
+            const div = document.createElement('div');
+            div.className = 'p-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs font-mono';
+            div.innerHTML = `
+              <span class="${lvl.color}">${lvl.label}</span>
+              <span class="font-bold text-white">$${lvl.price.toFixed(2)}</span>
+            `;
+            fibTable.appendChild(div);
+          }
+        });
       }
     }
 

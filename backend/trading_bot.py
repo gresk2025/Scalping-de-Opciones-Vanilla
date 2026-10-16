@@ -6,7 +6,8 @@ from typing import Dict, Any, Optional
 from .config import load_settings, update_setting
 from .database import (
     create_trade, close_trade, get_open_trade,
-    get_daily_pnl, get_total_stats, add_log, get_recent_logs
+    get_daily_pnl, get_total_stats, add_log, get_recent_logs,
+    get_trades_history
 )
 from .smc_engine import analyze_smc
 from .black_scholes import calculate_option_price
@@ -115,6 +116,8 @@ class TradingBot:
             try:
                 self.reload_settings()
                 current_sol = self.md.latest_price
+                if current_sol <= 0 and self.md.klines_15m:
+                    current_sol = self.md.klines_15m[-1]["close"]
 
                 if current_sol > 0 and len(self.md.klines_15m) >= 20:
                     # 1. Ejecutar análisis SMC continuo
@@ -208,6 +211,15 @@ class TradingBot:
     def get_dashboard_state(self) -> Dict[str, Any]:
         stats = get_total_stats()
         current_sol = self.md.latest_price
+        if current_sol <= 0 and self.md.klines_15m:
+            current_sol = self.md.klines_15m[-1]["close"]
+
+        if (not self.current_analysis or not self.current_analysis.get("trading_setups")) and current_sol > 0 and len(self.md.klines_15m) >= 20:
+            try:
+                self.current_analysis = analyze_smc(self.md.klines_15m, current_sol)
+            except Exception as e:
+                pass
+
         active_info = None
 
         if self.active_trade:

@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scalping de Opciones Vanilla | SOL/USDT</title>
+  <title>Dashboard | Scalping Opciones Vanilla SOL/USDT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
   <script>
@@ -18,41 +18,48 @@
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           },
-          colors: {
-            brand: {
-              dark: '#080B11',
-              card: '#0F1523',
-              cardBorder: '#1E293B',
-              accent: '#6366F1',
-              bull: '#10B981',
-              bear: '#F43F5E',
-              paper: '#0284C7',
-              warning: '#F59E0B'
-            }
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           }
         }
       }
     }
   </script>
   <style>
-    body { background-color: #080B11; color: #E2E8F0; }
-    .glass-panel { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.4); }
-    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
-    @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    body {
+      background-color: #080B11;
+      color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.45);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 4px;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-brand-accent selection:text-white pb-12">
+<body class="min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white pb-10">
 
+  <!-- Banner de Modo de Operación -->
   <div id="modeBanner" class="w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50">
-    <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
-    <span id="modeBannerText">🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)</span>
+    <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span>
+    <span id="modeBannerText">MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)</span>
   </div>
 
+  <!-- Header Superior -->
   <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="max-w-[1600px] w-full mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +75,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center flex-wrap gap-2.5">
         <div id="botStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span id="botStatusText">ACTIVO</span>
@@ -110,8 +117,10 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5 w-full">
+  <!-- Contenedor Principal (1600px para aprovechar todo el ancho) -->
+  <main class="max-w-[1600px] w-full mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5">
 
+    <!-- FILA 1: 5 TARJETAS KPI -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
       <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
         <div class="flex items-center justify-between text-xs text-slate-400">
@@ -162,7 +171,210 @@
       </div>
     </div>
 
+    <!-- FILA 2: GRÁFICO NORMALITO DE VELAS (2 cols) + CEREBRO SMC & CONFLUENCIAS (1 col) -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      
+      <!-- Gráfico Normal de Velas 15m (Dashboard) -->
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              Gráfico en Vivo (SOL/USDT · Velas 15M)
+            </h3>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <span id="chartCandleTime" class="text-slate-400">15m</span>
+            <span class="text-slate-600">|</span>
+            <a href="/grafico" class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+              Ver SMC Pro ↗
+            </a>
+          </div>
+        </div>
+
+        <div id="chartContainer" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-950/80 relative">
+          <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-xs text-slate-400">
+            Conectando con Binance WebSocket y cargando velas...
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta Cerebro SMC & Confluencias -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+            Cerebro SMC & Confluencias
+          </h3>
+          <div id="confluenceBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            0%
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+            <span>Nivel de Confluencia Institucional</span>
+            <span id="confluenceThreshold">Umbral mínimo: 65%</span>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+            <div id="confluenceBar" class="h-full bg-gradient-to-r from-slate-600 via-indigo-500 to-emerald-400 transition-all duration-500 w-0"></div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
+          <div class="text-[11px] font-semibold text-slate-400 mb-1">Análisis Técnico en Tiempo Real:</div>
+          <p id="smcRationale" class="text-xs text-slate-200 leading-relaxed">
+            Analizando estructura de mercado y esperando confluencia en temporalidad 15M...
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+          <div id="tagOB" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Order Blocks
+          </div>
+          <div id="tagFVG" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> FVG Imbalances
+          </div>
+          <div id="tagFib" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Fib 0.618 / 0.705
+          </div>
+          <div id="tagTrend" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Estructura
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FILA 3: MONITOR DE OPERACIONES (APROVECHANDO TODO EL ANCHO) -->
+    <div id="activeTradeCard" class="w-full glass-panel rounded-2xl p-5 flex flex-col gap-3.5 border-indigo-500/30 shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            Monitor de Operaciones
+          </span>
+          <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">| Detección en vivo de niveles, precio esperado y posición activa</span>
+        </div>
+        <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          EN ESPERA
+        </span>
+      </div>
+
+      <!-- ESTADO 1: EN ESPERA DEL PRECIO X (ACECHANDO SETUP - 4 COLUMNAS EN ANCHO COMPLETO) -->
+      <div id="pendingTradeDetails" class="grid grid-cols-1 md:grid-cols-4 gap-3.5 w-full">
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-amber-500/30 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] text-amber-400 font-mono font-semibold uppercase tracking-wider block">🎯 Nivel Acechado</span>
+            <span class="text-xs text-slate-400 mt-1 block">En espera del precio:</span>
+            <div id="pendingTargetPrice" class="text-2xl font-bold font-mono text-amber-300 mt-0.5">$0.00</div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Distancia a SOL:</span>
+            <span id="pendingDistance" class="font-bold text-slate-200">$0.00 (0.0%)</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between font-mono">
+          <div>
+            <span class="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider block">⚡ Orden Proyectada</span>
+            <span class="text-xs text-slate-400 mt-1 block">Contrato derivado:</span>
+            <div id="pendingContractProjected" class="text-lg font-bold text-white mt-0.5">CALL Strike $0</div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-xs">
+            <span class="text-slate-400">Lote sugerido:</span>
+            <span class="font-semibold text-slate-200">5 contratos (0DTE)</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between font-mono">
+          <div>
+            <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">📊 Confluencia Requerida</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <span id="pendingConfluence" class="text-lg font-bold text-indigo-300">0%</span>
+              <span class="text-[11px] text-slate-400">mín. 65%</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 mt-2 overflow-hidden">
+              <div id="pendingConfluenceBar" class="h-full bg-indigo-500 w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-2">Gatillo automático por SMC al tocar zona</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-900/50 flex flex-col justify-between font-mono text-slate-300 text-xs">
+          <div>
+            <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider block">🏛️ Zona Institucional</span>
+            <div id="pendingZoneName" class="font-bold text-slate-100 text-[13px] mt-1 leading-snug">Monitoreando Order Blocks y Fibonacci...</div>
+            <p id="pendingRationale" class="text-slate-400 text-[11px] mt-1.5 leading-relaxed font-sans">El bot disparará la compra cuando SOL mitigue este nivel y la confluencia alcance ≥ 65%.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO 2: OPERACIÓN EN CURSO EN PRECIO X (4 COLUMNAS EN ANCHO COMPLETO) -->
+      <div id="activeTradeDetails" class="hidden grid grid-cols-1 md:grid-cols-4 gap-3.5 w-full">
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/40 flex flex-col justify-between font-mono">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="activeSymbol" class="text-lg font-bold text-white">SOL-C-184</span>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300"><span id="activeContracts">5</span> ctr</span>
+            </div>
+            <div class="text-xs text-emerald-400 font-semibold mt-1">
+              Iniciada en SOL: <strong id="activeEntrySolPrice" class="text-white text-sm">$0.00</strong>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-800/60 text-xs text-slate-400 flex items-center justify-between">
+            <span>Hora Apertura:</span>
+            <span id="activeEntryTime" class="text-slate-200">--:--:--</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between font-mono">
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase">Primas de Operación</span>
+            <div class="flex items-baseline justify-between mt-1">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Entrada:</span>
+                <span id="activeEntryPremium" class="text-sm font-semibold text-slate-200">$0.00</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block">Actual:</span>
+                <span id="activeCurrentPremium" class="text-sm font-bold text-emerald-400">$0.00</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-800/60 text-xs text-slate-400 flex items-center justify-between">
+            <span>Tiempo Mercado:</span>
+            <span id="activeElapsedTimer" class="text-amber-400 font-bold">0m / 90m</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between font-mono">
+          <div>
+            <span class="text-[10px] text-slate-400 block uppercase">PnL Flotante en Vivo</span>
+            <div id="activeLivePnl" class="text-2xl font-bold text-emerald-400 mt-1">+$0.00</div>
+            <div id="activeLivePnlPct" class="text-xs font-semibold text-emerald-400 mt-0.5">+0.0%</div>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-1">TP Target +75% | SL Target -35%</div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between font-mono">
+          <div>
+            <span class="text-[10px] text-emerald-400 font-semibold block uppercase">Log de Operación</span>
+            <p id="activeTradeLog" class="text-xs text-slate-300 mt-1 leading-snug font-sans">Operación en curso iniciada en precio X.</p>
+          </div>
+          <button onclick="closeActiveTradeManual()" class="w-full py-2 mt-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition flex items-center justify-center gap-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            Cerrar Posición Inmediatamente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILA 4: CENTRO DE OPERACIONES (2 cols) + TERMINAL DE LOGS (1 col) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      
+      <!-- Centro de Operaciones con Pestañas -->
       <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-2.5 gap-2">
           <div class="flex items-center gap-2">
@@ -214,183 +426,7 @@
         </div>
       </div>
 
-      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-              Cerebro SMC & Confluencias
-            </h3>
-            <div id="confluenceBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-              0%
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-              <span>Nivel de Confluencia Institucional</span>
-              <span id="confluenceThreshold">Umbral mínimo: 70%</span>
-            </div>
-            <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
-              <div id="confluenceBar" class="h-full bg-gradient-to-r from-slate-600 via-indigo-500 to-emerald-400 transition-all duration-500 w-0"></div>
-            </div>
-          </div>
-
-          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
-            <div class="text-[11px] font-semibold text-slate-400 mb-1">Análisis Técnico en Tiempo Real:</div>
-            <p id="smcRationale" class="text-xs text-slate-200 leading-relaxed">
-              Analizando estructura de mercado y esperando confluencia en temporalidad 15M...
-            </p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
-            <div id="tagOB" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Order Blocks
-            </div>
-            <div id="tagFVG" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> FVG Imbalances
-            </div>
-            <div id="tagFib" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Fib 0.618 / 0.705
-            </div>
-            <div id="tagTrend" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Estructura
-            </div>
-          </div>
-        </div>
-
-        <div id="activeTradeCard" class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              Monitor de Operaciones
-            </span>
-            <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-              EN ESPERA
-            </span>
-          </div>
-
-          <!-- ESTADO 1: EN ESPERA DEL PRECIO X (ACECHANDO SETUP) -->
-          <div id="pendingTradeDetails" class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-[10px] text-amber-400/90 font-mono font-semibold uppercase tracking-wider block">Acechando Entrada</span>
-                <div class="flex items-baseline gap-1.5 mt-0.5">
-                  <span class="text-xs text-slate-400">En espera del precio:</span>
-                  <span id="pendingTargetPrice" class="text-lg font-bold font-mono text-amber-300">$0.00</span>
-                </div>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] text-slate-400 block font-mono">Distancia a SOL:</span>
-                <span id="pendingDistance" class="text-xs font-mono font-bold text-slate-300">$0.00 (0.0%)</span>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-xs p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 font-mono">
-              <div>
-                <span class="text-[10px] text-slate-400 block">Orden proyectada:</span>
-                <span id="pendingContractProjected" class="text-indigo-300 font-semibold text-[11px]">CALL Strike $0</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400 block">Confluencia actual:</span>
-                <span id="pendingConfluence" class="text-slate-200 font-semibold text-[11px]">0% / 65% req</span>
-              </div>
-            </div>
-
-            <div class="text-[11px] p-2.5 rounded-xl bg-indigo-950/20 border border-indigo-900/40 text-slate-300 leading-relaxed font-mono">
-              <div class="flex items-start gap-1.5">
-                <span class="text-indigo-400 text-xs mt-0.5">🎯</span>
-                <div>
-                  <span class="text-indigo-300 font-bold">Nivel / Zona:</span>
-                  <span id="pendingZoneName" class="text-slate-300">Monitoreando Order Blocks y Fibonacci...</span>
-                  <p id="pendingRationale" class="text-slate-400 text-[10px] mt-1">El bot disparará la compra cuando SOL mitigue este nivel y la confluencia alcance ≥ 65%.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ESTADO 2: OPERACIÓN EN CURSO EN PRECIO X -->
-          <div id="activeTradeDetails" class="hidden flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <span id="activeSymbol" class="text-sm font-bold text-white font-mono">SOL-C-184</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono"><span id="activeContracts">5</span> ctr</span>
-                </div>
-                <div class="text-[11px] text-emerald-400 font-mono font-medium mt-0.5">
-                  Iniciada en SOL: <strong id="activeEntrySolPrice" class="text-white font-bold">$0.00</strong>
-                </div>
-              </div>
-              <div class="text-right">
-                <div id="activeLivePnl" class="text-lg font-bold font-mono text-emerald-400">+$0.00</div>
-                <div id="activeLivePnlPct" class="text-xs font-mono text-emerald-400 font-semibold">+0.0%</div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-xs p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 font-mono">
-              <div>
-                <span class="text-[10px] text-slate-400 block">Prima Entrada:</span>
-                <span id="activeEntryPremium" class="text-slate-200 font-semibold">$0.00</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400 block">Prima Actual:</span>
-                <span id="activeCurrentPremium" class="text-slate-200 font-semibold">$0.00</span>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
-              <span>Tiempo en mercado:</span>
-              <span id="activeElapsedTimer" class="text-amber-400 font-bold">0m / 90m</span>
-            </div>
-
-            <div class="text-[10px] p-2 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-400 font-mono leading-tight">
-              <span class="text-emerald-400 font-bold">Log Operación:</span>
-              <span id="activeTradeLog">Operación en curso iniciada en precio X.</span>
-            </div>
-
-            <button onclick="closeActiveTradeManual()" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              Cerrar Operación Inmediatamente
-            </button>
-          </div>
-        </div></div>
-
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
-        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Historial de Operaciones
-          </h3>
-          <span class="text-xs text-slate-500 font-mono">Últimas 50 operaciones</span>
-        </div>
-
-        <div class="overflow-x-auto custom-scroll max-h-[260px]">
-          <table class="w-full text-left text-xs font-mono">
-            <thead class="text-[11px] text-slate-400 uppercase bg-slate-900/60 sticky top-0">
-              <tr>
-                <th class="py-2 px-3">Hora</th>
-                <th class="py-2 px-3">Tipo</th>
-                <th class="py-2 px-3">Strike</th>
-                <th class="py-2 px-3">Lote</th>
-                <th class="py-2 px-3">Prima Ent/Sal</th>
-                <th class="py-2 px-3">PnL Neto</th>
-                <th class="py-2 px-3">Razón</th>
-                <th class="py-2 px-3">Modo</th>
-              </tr>
-            </thead>
-            <tbody id="tradesTableBody" class="divide-y divide-slate-800/60 text-slate-300">
-              <tr>
-                <td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+      <!-- Terminal de Logs -->
       <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
         <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
           <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -400,14 +436,16 @@
           <span class="text-[10px] text-slate-500 font-mono">Eventos en vivo</span>
         </div>
 
-        <div id="terminalLog" class="p-3 rounded-xl bg-slate-950 font-mono text-[11px] h-[260px] overflow-y-auto custom-scroll flex flex-col gap-1.5 text-slate-300">
+        <div id="terminalLog" class="p-3 rounded-xl bg-slate-950 font-mono text-[11px] h-[300px] overflow-y-auto custom-scroll flex flex-col gap-1.5 text-slate-300">
           <div class="text-slate-500">> Sistema iniciado. Conectando...</div>
         </div>
       </div>
+
     </div>
 
   </main>
 
+  <!-- Modal de Configuración Binance -->
   <div id="configModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -493,43 +531,32 @@
           </div>
         </div>
 
-        <div id="testConnectionResult" class="hidden p-3 rounded-xl text-xs font-mono"></div>
-      </div>
+        <div id="configFeedback" class="hidden p-2.5 rounded-lg text-xs font-medium"></div>
 
-      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
-        <button onclick="closeConfigModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-          Cancelar
-        </button>
-        <button id="btnSaveConfig" onclick="saveBinanceConfig()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
-          <span>Probar y Guardar</span>
-        </button>
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button type="button" onclick="closeConfigModal()" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white transition">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveBinanceConfig()" id="btnSaveConfig" class="px-5 py-2 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+            <span>Probar y Guardar</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de Credenciales y Seguridad -->
+  <!-- Modal de Credenciales -->
   <div id="credentialsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col gap-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-          Seguridad de Acceso
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🔐</span> Cambiar Usuario y Contraseña
         </h3>
-        <button onclick="closeCredentialsModal()" class="text-slate-400 hover:text-white">&times;</button>
+        <button onclick="closeCredentialsModal()" class="text-slate-400 hover:text-white text-lg font-bold">&times;</button>
       </div>
-
-      <p class="text-xs text-slate-300 leading-relaxed">
-        Modifica el usuario y la clave de acceso al Dashboard. Deberás ingresar tu contraseña actual para confirmar los cambios.
-      </p>
 
       <div class="flex flex-col gap-3 text-xs">
         <div>
-          <label class="block text-slate-400 font-medium mb-1">Contraseña Actual:</label>
-          <input type="password" id="inputCurrentPass" placeholder="Ingresa tu clave actual"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
-        </div>
-
-        <div class="border-t border-slate-800/80 pt-2">
           <label class="block text-slate-400 font-medium mb-1">Nuevo Usuario:</label>
           <input type="text" id="inputNewUser" placeholder="admin"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
@@ -537,26 +564,26 @@
 
         <div>
           <label class="block text-slate-400 font-medium mb-1">Nueva Contraseña:</label>
-          <input type="password" id="inputNewPass" placeholder="Mínimo 6 caracteres"
+          <input type="password" id="inputNewPass" placeholder="Nueva contraseña segura"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-slate-400 font-medium mb-1">Confirmar Nueva Contraseña:</label>
+          <label class="block text-slate-400 font-medium mb-1">Confirmar Contraseña:</label>
           <input type="password" id="inputConfirmPass" placeholder="Repite la nueva contraseña"
             class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-100 font-mono text-xs focus:border-indigo-500 focus:outline-none">
         </div>
 
-        <div id="credResultBox" class="hidden p-3 rounded-xl text-xs font-mono"></div>
-      </div>
+        <div id="credFeedback" class="hidden p-2.5 rounded-lg text-xs font-medium"></div>
 
-      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
-        <button onclick="closeCredentialsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-          Cancelar
-        </button>
-        <button id="btnSaveCredentials" onclick="saveCredentials()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
-          <span>Guardar Cambios</span>
-        </button>
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button type="button" onclick="closeCredentialsModal()" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveNewCredentials()" id="btnSaveCred" class="px-4 py-1.5 rounded-lg font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
+            <span>Guardar Cambios</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -564,11 +591,17 @@
   <script>
     let chart, candleSeries;
     let ws = null;
-    let isPaperMode = true;
+    let currentKlines = [];
     let currentBotState = null;
+    let isPaperMode = true;
+    let currentFilter = 'all';
+    let cachedClosedTrades = [];
 
+    // Inicializar Gráfico de Velas del Dashboard
     function initChart() {
       const container = document.getElementById('chartContainer');
+      if (!container) return;
+
       chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
         height: container.clientHeight,
@@ -579,8 +612,8 @@
           fontFamily: '"JetBrains Mono", monospace'
         },
         grid: {
-          vertLines: { color: 'rgba(30, 41, 59, 0.5)' },
-          horzLines: { color: 'rgba(30, 41, 59, 0.5)' }
+          vertLines: { color: 'rgba(30, 41, 59, 0.45)' },
+          horzLines: { color: 'rgba(30, 41, 59, 0.45)' }
         },
         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
         rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.6)' },
@@ -597,27 +630,41 @@
       });
 
       window.addEventListener('resize', () => {
-        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+        if (chart && container) {
+          chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+        }
       });
 
-      loadInitialKlines();
+      loadKlines();
     }
 
-    async function loadInitialKlines() {
+    async function loadKlines() {
       try {
         const res = await fetch('/api/klines');
         if (res.ok) {
           const klines = await res.json();
           if (klines && klines.length > 0) {
-            candleSeries.setData(klines);
-            document.getElementById('chartLoading').classList.add('hidden');
+            currentKlines = klines;
+            if (candleSeries) candleSeries.setData(klines);
+            const loadEl = document.getElementById('chartLoading');
+            if (loadEl) loadEl.classList.add('hidden');
+            if (chart) chart.timeScale().fitContent();
+
+            const lastK = klines[klines.length - 1];
+            if (lastK && lastK.close) {
+              const pEl = document.getElementById('solPrice');
+              if (pEl && pEl.innerText === '$0.00') {
+                pEl.innerText = `$${lastK.close.toFixed(2)}`;
+              }
+            }
           }
         }
       } catch (e) {
-        console.error('Error cargando klines:', e);
+        console.error('Error cargando velas:', e);
       }
     }
 
+    // Conexión WebSocket
     function connectWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -625,16 +672,22 @@
       ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+        const dot = document.getElementById('wsStatusDot');
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
       };
 
       ws.onmessage = (event) => {
-        const state = JSON.parse(event.data);
-        updateDashboard(state);
+        try {
+          const state = JSON.parse(event.data);
+          updateDashboard(state);
+        } catch (e) {
+          console.error('Error procesando mensaje WebSocket:', e);
+        }
       };
 
       ws.onclose = () => {
-        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-rose-400 animate-ping';
+        const dot = document.getElementById('wsStatusDot');
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-400 animate-ping';
         setTimeout(connectWebSocket, 2000);
       };
 
@@ -651,76 +704,129 @@
       }
       isPaperMode = state.paper_trading;
 
+      // Banner de modo
       const banner = document.getElementById('modeBanner');
       const bannerText = document.getElementById('modeBannerText');
       const modeBtnLabel = document.getElementById('modeToggleLabel');
 
-      if (isPaperMode) {
-        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50';
-        bannerText.innerHTML = '🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)';
-        modeBtnLabel.innerText = 'Cambiar a Modo Real';
-      } else {
-        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-rose-950/90 text-rose-300 border-b border-rose-800 animate-pulse-slow';
-        bannerText.innerHTML = '⚠️ MODO REAL ACTIVO — DINERO EN RIESGO REAL (Conectado a Binance Vanilla Options)';
-        modeBtnLabel.innerText = 'Cambiar a Simulación';
+      if (banner && bannerText && modeBtnLabel) {
+        if (isPaperMode) {
+          banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50';
+          bannerText.innerHTML = '<span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></span> MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)';
+          modeBtnLabel.innerText = 'Cambiar a Modo Real';
+        } else {
+          banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-rose-950/90 text-rose-300 border-b border-rose-800 animate-pulse-slow';
+          bannerText.innerHTML = '<span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-400 animate-ping"></span> ⚠️ MODO REAL ACTIVO — DINERO EN RIESGO REAL (Conectado a Binance Vanilla Options)';
+          modeBtnLabel.innerText = 'Cambiar a Paper Trading';
+        }
       }
 
+      // Estado del Bot
       const statusBadge = document.getElementById('botStatusBadge');
       const statusText = document.getElementById('botStatusText');
-      const pauseText = document.getElementById('pauseBtnText');
+      const pauseBtnText = document.getElementById('pauseBtnText');
 
-      if (state.status === 'RUNNING') {
-        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60';
-        statusText.innerText = 'ACTIVO';
-        pauseText.innerText = 'Pausar';
-      } else if (state.status === 'CIRCUIT_BREAKER') {
-        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-950/80 text-rose-300 border border-rose-800 animate-pulse';
-        statusText.innerText = 'CIRCUITO DISPARADO (-$5.00)';
-        pauseText.innerText = 'Resetear Circuito';
-      } else {
-        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-800/60';
-        statusText.innerText = 'PAUSADO';
-        pauseText.innerText = 'Reanudar';
+      if (statusBadge && statusText && pauseBtnText) {
+        if (state.status === 'RUNNING') {
+          statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60';
+          statusText.innerText = 'ACTIVO';
+          pauseBtnText.innerText = 'Pausar';
+        } else if (state.status === 'CIRCUIT_BREAKER') {
+          statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-950/80 text-rose-400 border border-rose-700 animate-pulse';
+          statusText.innerText = 'CIRCUIT BREAKER';
+          pauseBtnText.innerText = 'Resetear';
+        } else {
+          statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-800/60';
+          statusText.innerText = 'PAUSADO';
+          pauseBtnText.innerText = 'Reanudar';
+        }
       }
 
-      const priceEl = document.getElementById('solPrice');
-      priceEl.innerText = `$${state.sol_price.toFixed(2)}`;
-      const changeEl = document.getElementById('solChange');
-      const chg = state.price_change_24h;
-      changeEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
-      changeEl.className = chg >= 0 ? 'text-xs font-mono text-emerald-400 font-semibold' : 'text-xs font-mono text-rose-400 font-semibold';
+      // Ticker SOL y Actualización de Vela
+      if (state.sol_price > 0) {
+        const solEl = document.getElementById('solPrice');
+        if (solEl) solEl.innerText = `$${state.sol_price.toFixed(2)}`;
 
-      const pnlTodayEl = document.getElementById('pnlToday');
-      const dp = state.stats.daily_pnl;
-      pnlTodayEl.innerText = `${dp >= 0 ? '+' : ''}$${dp.toFixed(2)}`;
-      pnlTodayEl.className = `text-xl md:text-2xl font-bold font-mono ${dp >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        const chgEl = document.getElementById('solChange');
+        if (chgEl) {
+          const chg = state.price_change_24h || 0;
+          chgEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
+          chgEl.className = chg >= 0 ? 'text-xs font-mono text-emerald-400 font-semibold' : 'text-xs font-mono text-rose-400 font-semibold';
+        }
 
-      const riskPct = Math.min(Math.max((Math.abs(Math.min(dp, 0)) / state.settings.max_daily_loss) * 100, 0), 100);
-      const riskBar = document.getElementById('pnlRiskBar');
-      riskBar.style.width = `${riskPct}%`;
-      riskBar.className = riskPct > 70 ? 'bg-rose-500 h-full' : (riskPct > 40 ? 'bg-amber-500 h-full' : 'bg-emerald-500 h-full');
-
-      const totPnl = state.stats.total_pnl;
-      const pnlTotEl = document.getElementById('pnlTotal');
-      pnlTotEl.innerText = `${totPnl >= 0 ? '+' : ''}$${totPnl.toFixed(2)}`;
-      pnlTotEl.className = `text-xl md:text-2xl font-bold font-mono ${totPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-      document.getElementById('tradesCount').innerText = `${state.stats.total_trades} operaciones`;
-      document.getElementById('winRate').innerText = `${state.stats.win_rate}%`;
-      document.getElementById('winLossRatio').innerText = `${state.stats.wins}W - ${state.stats.losses}L`;
-      document.getElementById('contractsCountLabel').innerText = `${state.settings.default_contracts} Contratos`;
-
-      const ans = state.analysis;
-      document.getElementById('confluenceBadge').innerText = `${ans.confidence}%`;
-      document.getElementById('confluenceBar').style.width = `${ans.confidence}%`;
-      document.getElementById('smcRationale').innerText = ans.rationale;
-
-      const obTag = document.getElementById('tagOB');
-      if (ans.order_blocks && ans.order_blocks.length > 0) {
-        obTag.className = 'p-2 rounded-lg bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 flex items-center gap-1.5';
-      } else {
-        obTag.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
+        if (candleSeries && currentKlines.length > 0) {
+          const last = { ...currentKlines[currentKlines.length - 1] };
+          last.close = state.sol_price;
+          if (state.sol_price > last.high) last.high = state.sol_price;
+          if (state.sol_price < last.low) last.low = state.sol_price;
+          candleSeries.update(last);
+        }
       }
 
+      // KPIs
+      if (state.stats) {
+        const s = state.stats;
+        const pTodayEl = document.getElementById('pnlToday');
+        if (pTodayEl) {
+          pTodayEl.innerText = `${s.daily_pnl >= 0 ? '+' : ''}$${s.daily_pnl.toFixed(2)}`;
+          pTodayEl.className = `text-xl md:text-2xl font-bold font-mono ${s.daily_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        const pTotalEl = document.getElementById('pnlTotal');
+        if (pTotalEl) {
+          pTotalEl.innerText = `${s.total_pnl >= 0 ? '+' : ''}$${s.total_pnl.toFixed(2)}`;
+          pTotalEl.className = `text-xl md:text-2xl font-bold font-mono ${s.total_pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        const trCountEl = document.getElementById('tradesCount');
+        if (trCountEl) trCountEl.innerText = `${s.total_trades} operaciones`;
+
+        const winRateEl = document.getElementById('winRate');
+        if (winRateEl) winRateEl.innerText = `${s.win_rate.toFixed(1)}%`;
+
+        const winLossEl = document.getElementById('winLossRatio');
+        if (winLossEl) winLossEl.innerText = `${s.winning_trades}W - ${s.losing_trades}L`;
+
+        const maxLoss = state.settings ? state.settings.max_daily_loss : 5.0;
+        const lossPct = Math.min(Math.max((-s.daily_pnl / maxLoss) * 100, 0), 100);
+        const riskBar = document.getElementById('pnlRiskBar');
+        if (riskBar) {
+          riskBar.style.width = `${lossPct}%`;
+          riskBar.className = lossPct > 70 ? 'bg-rose-500 h-full transition-all duration-300' : 'bg-emerald-500 h-full transition-all duration-300';
+        }
+      }
+
+      // Cerebro SMC
+      if (state.analysis) {
+        const a = state.analysis;
+        const cBadge = document.getElementById('confluenceBadge');
+        if (cBadge) cBadge.innerText = `${a.confidence}%`;
+
+        const cBar = document.getElementById('confluenceBar');
+        if (cBar) cBar.style.width = `${a.confidence}%`;
+
+        const rText = document.getElementById('smcRationale');
+        if (rText) rText.innerText = a.rationale;
+
+        const updateTag = (id, active) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (active) {
+            el.className = 'p-2 rounded-lg bg-indigo-950/80 border border-indigo-500/50 text-indigo-300 flex items-center gap-1.5 font-semibold';
+            el.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse';
+          } else {
+            el.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
+            el.querySelector('span').className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+          }
+        };
+
+        updateTag('tagOB', a.order_blocks && a.order_blocks.length > 0);
+        updateTag('tagFVG', a.fvgs && a.fvgs.length > 0);
+        updateTag('tagFib', a.confidence >= 30);
+        updateTag('tagTrend', a.trend !== 'NEUTRAL');
+      }
+
+      // MONITOR DE OPERACIONES (ANCHO COMPLETO)
       const active = state.active_trade;
       const pending = state.pending_setup;
       const pendingDetails = document.getElementById('pendingTradeDetails');
@@ -733,31 +839,49 @@
 
         if (typeBadge) {
           typeBadge.className = active.option_type === 'CALL'
-            ? 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1'
-            : 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1';
-          typeBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${active.option_type === 'CALL' ? 'bg-emerald-400' : 'bg-rose-400'} animate-ping"></span> EN CURSO (${active.option_type})`;
+            ? 'text-xs font-bold font-mono px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-sm'
+            : 'text-xs font-bold font-mono px-3 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 shadow-sm';
+          typeBadge.innerHTML = `<span class="w-2 h-2 rounded-full ${active.option_type === 'CALL' ? 'bg-emerald-400' : 'bg-rose-400'} animate-ping"></span> EN CURSO (${active.option_type})`;
         }
 
-        document.getElementById('activeSymbol').innerText = active.symbol;
-        document.getElementById('activeContracts').innerText = active.contracts;
+        const symEl = document.getElementById('activeSymbol');
+        if (symEl) symEl.innerText = active.symbol;
+
+        const ctrEl = document.getElementById('activeContracts');
+        if (ctrEl) ctrEl.innerText = active.contracts;
+
         const entrySol = active.entry_sol_price ? active.entry_sol_price.toFixed(2) : (state.sol_price ? state.sol_price.toFixed(2) : '0.00');
-        document.getElementById('activeEntrySolPrice').innerText = `$${entrySol}`;
-        document.getElementById('activeEntryPremium').innerText = `$${active.entry_premium.toFixed(2)}`;
-        document.getElementById('activeCurrentPremium').innerText = `$${active.current_premium.toFixed(2)}`;
+        const entrySolEl = document.getElementById('activeEntrySolPrice');
+        if (entrySolEl) entrySolEl.innerText = `$${entrySol}`;
+
+        const entryTimeEl = document.getElementById('activeEntryTime');
+        if (entryTimeEl) {
+          entryTimeEl.innerText = active.entry_time ? active.entry_time.split('T')[1].substring(0, 8) : 'En vivo';
+        }
+
+        const entPremEl = document.getElementById('activeEntryPremium');
+        if (entPremEl) entPremEl.innerText = `$${active.entry_premium.toFixed(2)}`;
+
+        const curPremEl = document.getElementById('activeCurrentPremium');
+        if (curPremEl) curPremEl.innerText = `$${active.current_premium.toFixed(2)}`;
 
         const pnl = active.unrealized_pnl_usd;
         const pnlPct = active.unrealized_pnl_pct;
         const livePnlEl = document.getElementById('activeLivePnl');
         const livePnlPctEl = document.getElementById('activeLivePnlPct');
 
-        livePnlEl.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
-        livePnlPctEl.innerText = `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%`;
+        if (livePnlEl) {
+          livePnlEl.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
+          livePnlEl.className = `text-2xl font-bold font-mono ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+        if (livePnlPctEl) {
+          livePnlPctEl.innerText = `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%`;
+          livePnlPctEl.className = `text-xs font-semibold font-mono ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
 
-        const colorClass = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
-        livePnlEl.className = `text-lg font-bold font-mono ${colorClass}`;
-        livePnlPctEl.className = `text-xs font-mono font-semibold ${colorClass}`;
+        const timerEl = document.getElementById('activeElapsedTimer');
+        if (timerEl) timerEl.innerText = `${active.elapsed_minutes}m / ${active.max_minutes}m`;
 
-        document.getElementById('activeElapsedTimer').innerText = `${active.elapsed_minutes}m / ${active.max_minutes}m`;
         const logEl = document.getElementById('activeTradeLog');
         if (logEl) logEl.innerText = active.log || `Operación en curso iniciada en SOL $${entrySol}.`;
       } else {
@@ -765,32 +889,42 @@
         if (pendingDetails) pendingDetails.classList.remove('hidden');
 
         if (typeBadge) {
-          typeBadge.className = 'text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1';
-          typeBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> EN ESPERA';
+          typeBadge.className = 'text-xs font-bold font-mono px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 shadow-sm';
+          typeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> EN ESPERA';
         }
 
         if (pending) {
           const targetPriceEl = document.getElementById('pendingTargetPrice');
           if (targetPriceEl) targetPriceEl.innerText = `$${pending.target_price.toFixed(2)}`;
+
           const distSign = (state.sol_price && pending.target_price >= state.sol_price) ? '+' : '-';
           const distEl = document.getElementById('pendingDistance');
           if (distEl) distEl.innerText = `${distSign}$${pending.distance_usd.toFixed(2)} (${pending.distance_pct.toFixed(2)}%)`;
+
           const projEl = document.getElementById('pendingContractProjected');
           if (projEl) projEl.innerText = `${pending.target_type} Strike $${pending.target_strike}`;
+
           const confEl = document.getElementById('pendingConfluence');
-          if (confEl) confEl.innerText = `${pending.confluence}% / ${pending.min_confluence}% req`;
+          if (confEl) confEl.innerText = `${pending.confluence}%`;
+
+          const confBar = document.getElementById('pendingConfluenceBar');
+          if (confBar) confBar.style.width = `${pending.confluence}%`;
+
           const zoneEl = document.getElementById('pendingZoneName');
           if (zoneEl) zoneEl.innerText = pending.zone_name || 'Zona Institucional SMC';
+
           const ratEl = document.getElementById('pendingRationale');
           if (ratEl) ratEl.innerText = pending.rationale || 'El bot entrará automáticamente cuando SOL mitigue este nivel.';
         }
       }
 
+      // CENTRO DE OPERACIONES (TABLA UNIFICADA)
       if (state.recent_trades) {
         cachedClosedTrades = state.recent_trades;
       }
       renderOperationsTable();
 
+      // Terminal Logs
       if (state.recent_logs) {
         renderTerminalLogs(state.recent_logs);
       }
@@ -813,9 +947,6 @@
       });
       term.scrollTop = term.scrollHeight;
     }
-
-    let currentFilter = 'all';
-    let cachedClosedTrades = [];
 
     function setOperationsFilter(filter) {
       currentFilter = filter;
@@ -846,10 +977,17 @@
       const countClosed = closed.length;
       const countTotal = countActive + countPending + countClosed;
 
-      if (document.getElementById('tabCountActive')) document.getElementById('tabCountActive').innerText = countActive;
-      if (document.getElementById('tabCountPending')) document.getElementById('tabCountPending').innerText = countPending;
-      if (document.getElementById('tabCountClosed')) document.getElementById('tabCountClosed').innerText = countClosed;
-      if (document.getElementById('operationsCountBadge')) document.getElementById('operationsCountBadge').innerText = `${countTotal} operaciones`;
+      const cActEl = document.getElementById('tabCountActive');
+      if (cActEl) cActEl.innerText = countActive;
+
+      const cPenEl = document.getElementById('tabCountPending');
+      if (cPenEl) cPenEl.innerText = countPending;
+
+      const cCloEl = document.getElementById('tabCountClosed');
+      if (cCloEl) cCloEl.innerText = countClosed;
+
+      const badgeEl = document.getElementById('operationsCountBadge');
+      if (badgeEl) badgeEl.innerText = `${countTotal} operaciones`;
 
       let rowsHtml = '';
       let renderedRows = 0;
@@ -978,7 +1116,7 @@
       }
 
       if (renderedRows === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500 text-xs">No hay operaciones para este filtro.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500 text-xs">No hay operaciones registradas para este filtro.</td></tr>';
       } else {
         tbody.innerHTML = rowsHtml;
       }
@@ -1001,169 +1139,182 @@
       }
     }
 
+    // Controles del Bot
+    async function toggleTradingMode() {
+      try {
+        const newMode = !isPaperMode;
+        const res = await fetch('/api/control/mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paper: newMode })
+        });
+        if (res.ok) {
+          isPaperMode = newMode;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function toggleBotPause() {
+      try {
+        await fetch('/api/control/toggle', { method: 'POST' });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function closeActiveTradeManual() {
+      if (!confirm('¿Deseas cerrar la operación activa inmediatamente a precio de mercado?')) return;
+      try {
+        await fetch('/api/control/close_active', { method: 'POST' });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Modal API Binance
+    function toggleApiGuide() {
+      const content = document.getElementById('apiGuideContent');
+      const arrow = document.getElementById('apiGuideArrow');
+      if (!content || !arrow) return;
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.innerText = '▲';
+      } else {
+        content.classList.add('hidden');
+        arrow.innerText = '▼';
+      }
+    }
+
+    function copyIpToClipboard() {
+      const ipEl = document.getElementById('displayVpsIp');
+      const btn = document.getElementById('btnCopyIp');
+      const ip = (ipEl && ipEl.innerText !== 'IP_DE_TU_VPS') ? ipEl.innerText.trim() : window.location.hostname;
+      navigator.clipboard.writeText(ip).then(() => {
+        if (btn) {
+          btn.innerText = '¡Copiado! ✓';
+          setTimeout(() => { btn.innerText = 'Copiar IP 📋'; }, 2000);
+        }
+      });
+    }
+
     function openConfigModal() {
       if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         const ipEl = document.getElementById('displayVpsIp');
         if (ipEl) ipEl.innerText = window.location.hostname;
       }
-      document.getElementById('configModal').classList.remove('hidden');
+      const m = document.getElementById('configModal');
+      if (m) m.classList.remove('hidden');
     }
 
     function closeConfigModal() {
-      document.getElementById('configModal').classList.add('hidden');
+      const m = document.getElementById('configModal');
+      if (m) m.classList.add('hidden');
     }
 
     async function saveBinanceConfig() {
-      const apiKey = document.getElementById('inputApiKey').value;
-      const apiSecret = document.getElementById('inputApiSecret').value;
-      const contracts = parseInt(document.getElementById('inputContracts').value);
-      const maxLoss = parseFloat(document.getElementById('inputMaxLoss').value);
-      const resultBox = document.getElementById('testConnectionResult');
-      const saveBtn = document.getElementById('btnSaveConfig');
+      const apiKey = document.getElementById('inputApiKey').value.trim();
+      const apiSecret = document.getElementById('inputApiSecret').value.trim();
+      const contracts = parseInt(document.getElementById('inputContracts').value) || 5;
+      const maxLoss = parseFloat(document.getElementById('inputMaxLoss').value) || 5.0;
 
-      saveBtn.innerText = 'Probando conexión...';
-      saveBtn.disabled = true;
+      const fb = document.getElementById('configFeedback');
+      const btn = document.getElementById('btnSaveConfig');
+
+      fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-sky-950/80 text-sky-300 border border-sky-800 block';
+      fb.innerText = 'Probando conexión con Binance Options...';
+      btn.disabled = true;
 
       try {
-        await fetch('/api/control/settings', {
+        const res = await fetch('/api/config/binance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ default_contracts: contracts, max_daily_loss: maxLoss })
+          body: JSON.stringify({
+            api_key: apiKey,
+            api_secret: apiSecret,
+            default_contracts: contracts,
+            max_daily_loss: maxLoss
+          })
         });
 
-        if (apiKey || apiSecret) {
-          const res = await fetch('/api/config/binance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api_key: apiKey, api_secret: apiSecret })
-          });
-          const data = await res.json();
-
-          resultBox.classList.remove('hidden');
-          if (data.success) {
-            resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-800';
-            resultBox.innerHTML = `✓ ${data.message}`;
-            setTimeout(closeConfigModal, 2000);
-          } else {
-            resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-            resultBox.innerHTML = `✗ ${data.message}`;
-          }
+        const data = await res.json();
+        if (res.ok) {
+          fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800 block';
+          fb.innerText = `¡Éxito! Conexión verificada. Saldo: ${data.balance_usdt} USDT.`;
+          setTimeout(() => { closeConfigModal(); }, 1500);
         } else {
-          resultBox.classList.remove('hidden');
-          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-slate-800 text-slate-300';
-          resultBox.innerHTML = 'Parámetros guardados correctamente.';
-          setTimeout(closeConfigModal, 1200);
+          fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+          fb.innerText = `Error: ${data.detail || 'Fallo de conexión'}`;
         }
       } catch (e) {
-        resultBox.classList.remove('hidden');
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = `Error: ${e.message}`;
+        fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+        fb.innerText = 'Error al conectar con el servidor.';
       } finally {
-        saveBtn.innerText = 'Probar y Guardar';
-        saveBtn.disabled = false;
+        btn.disabled = false;
       }
     }
 
+    // Modal Credenciales
     function openCredentialsModal() {
-      document.getElementById('inputCurrentPass').value = '';
-      document.getElementById('inputNewPass').value = '';
-      document.getElementById('inputConfirmPass').value = '';
-      document.getElementById('credResultBox').classList.add('hidden');
-      if (currentBotState && currentBotState.current_user) {
-        document.getElementById('inputNewUser').value = currentBotState.current_user;
-      }
-      document.getElementById('credentialsModal').classList.remove('hidden');
+      const m = document.getElementById('credentialsModal');
+      if (m) m.classList.remove('hidden');
     }
 
     function closeCredentialsModal() {
-      document.getElementById('credentialsModal').classList.add('hidden');
+      const m = document.getElementById('credentialsModal');
+      if (m) m.classList.add('hidden');
     }
 
-    async function saveCredentials() {
-      const currentPass = document.getElementById('inputCurrentPass').value.trim();
-      const newUser = document.getElementById('inputNewUser').value.trim();
-      const newPass = document.getElementById('inputNewPass').value.trim();
-      const confirmPass = document.getElementById('inputConfirmPass').value.trim();
-      const resultBox = document.getElementById('credResultBox');
-      const btn = document.getElementById('btnSaveCredentials');
+    async function saveNewCredentials() {
+      const u = document.getElementById('inputNewUser').value.trim();
+      const p = document.getElementById('inputNewPass').value;
+      const cp = document.getElementById('inputConfirmPass').value;
+      const fb = document.getElementById('credFeedback');
 
-      if (!currentPass) {
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = 'Debes ingresar tu contraseña actual.';
-        resultBox.classList.remove('hidden');
+      if (!u || !p) {
+        fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+        fb.innerText = 'Usuario y contraseña no pueden estar vacíos.';
         return;
       }
-
-      if (!newUser || newUser.length < 3) {
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = 'El usuario debe tener al menos 3 caracteres.';
-        resultBox.classList.remove('hidden');
+      if (p !== cp) {
+        fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+        fb.innerText = 'Las contraseñas no coinciden.';
         return;
       }
-
-      if (!newPass || newPass.length < 6) {
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = 'La nueva contraseña debe tener al menos 6 caracteres.';
-        resultBox.classList.remove('hidden');
-        return;
-      }
-
-      if (newPass !== confirmPass) {
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = 'Las nuevas contraseñas no coinciden.';
-        resultBox.classList.remove('hidden');
-        return;
-      }
-
-      btn.innerText = 'Guardando...';
-      btn.disabled = true;
 
       try {
         const res = await fetch('/api/auth/change-credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            current_password: currentPass,
-            new_username: newUser,
-            new_password: newPass
-          })
+          body: JSON.stringify({ username: u, password: p })
         });
         const data = await res.json();
-        resultBox.classList.remove('hidden');
-
-        if (res.ok && data.success) {
-          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-800';
-          resultBox.innerHTML = `✓ ${data.message}`;
-          const navU = document.getElementById('navUsername');
-          if (navU) navU.innerText = data.username;
-          setTimeout(closeCredentialsModal, 1500);
+        if (res.ok) {
+          fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800 block';
+          fb.innerText = 'Credenciales actualizadas correctamente.';
+          setTimeout(() => { closeCredentialsModal(); }, 1200);
         } else {
-          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-          resultBox.innerHTML = `✗ ${data.detail || data.message || 'Error al actualizar credenciales.'}`;
+          fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+          fb.innerText = data.detail || 'Error al cambiar credenciales.';
         }
-      } catch (err) {
-        resultBox.classList.remove('hidden');
-        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
-        resultBox.innerHTML = `Error: ${err.message}`;
-      } finally {
-        btn.innerText = 'Guardar Cambios';
-        btn.disabled = false;
+      } catch (e) {
+        fb.className = 'p-2.5 rounded-lg text-xs font-medium bg-rose-950/80 text-rose-300 border border-rose-800 block';
+        fb.innerText = 'Error de conexión.';
       }
     }
 
     async function handleLogout() {
-      if (confirm('¿Deseas cerrar tu sesión?')) {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        window.location.href = '/login';
-      }
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
     }
+
+    // Inicialización al cargar la página
     window.addEventListener('DOMContentLoaded', () => {
       initChart();
       connectWebSocket();
       loadTradeHistory();
-      setInterval(loadTradeHistory, 10000);
     });
   </script>
 </body>
 </html>
-
