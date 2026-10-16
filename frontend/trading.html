@@ -119,6 +119,220 @@
           </div>
         </div>
 
+        <!-- CALCULADORA INTERACTIVA DE RENDIMIENTO & RIESGO (SPOT & FUTUROS) -->
+        <div id="tradingCalculator" class="glass-panel rounded-2xl p-4 flex flex-col gap-3.5 border-indigo-500/30 shadow-2xl mt-1">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-sm shadow-sm">
+                🧮
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  Calculadora de Ganancias & Rendimiento
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Simulador</span>
+                </h3>
+                <span class="text-[10px] text-slate-400 font-mono">Calcula ganancias en tiempo real antes de comprar · Spot y Futuros USD-M</span>
+              </div>
+            </div>
+
+            <!-- Selector de Pestañas SPOT / FUTUROS -->
+            <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold">
+              <button id="calcTabSpotBtn" type="button" onclick="switchCalcTab('spot')" class="px-3 py-1 rounded-lg bg-emerald-600 text-white shadow-sm transition flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                <span>Spot (Contado)</span>
+              </button>
+              <button id="calcTabFutBtn" type="button" onclick="switchCalcTab('fut')" class="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                <span>Futuros (Apalancado)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PESTAÑA 1: CALCULADORA SPOT -->
+          <div id="calcSpotPanel" class="flex flex-col gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <!-- Precio Entrada -->
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between text-[11px] font-mono">
+                  <span class="text-slate-400 font-semibold">Precio de Compra SOL:</span>
+                  <button type="button" onclick="setCalcSpotPriceCurrent()" class="text-[10px] text-indigo-400 hover:text-indigo-300">↻ Usar actual</button>
+                </div>
+                <div class="relative">
+                  <input id="calcSpotEntry" type="number" step="0.01" oninput="recalcSpot()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-emerald-500 transition" placeholder="104.00">
+                  <span class="absolute right-3 top-2 text-xs font-mono text-slate-500">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono">
+                  <button type="button" onclick="setCalcSpotEntryFromOB('opt')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700">Entrada Óptima</button>
+                  <button type="button" onclick="setCalcSpotEntryFromOB('sec')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Entrada DCA</button>
+                </div>
+              </div>
+
+              <!-- Capital a Invertir -->
+              <div class="flex flex-col gap-1">
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">Capital a Invertir (USDT):</span>
+                <div class="relative">
+                  <input id="calcSpotCapital" type="number" step="10" value="100" oninput="recalcSpot()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-emerald-500 transition" placeholder="100">
+                  <span class="absolute right-3 top-2 text-xs font-mono text-slate-500">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono text-slate-400">
+                  <button type="button" onclick="setCalcSpotCapital(50)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$50</button>
+                  <button type="button" onclick="setCalcSpotCapital(100)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$100</button>
+                  <button type="button" onclick="setCalcSpotCapital(250)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$250</button>
+                  <button type="button" onclick="setCalcSpotCapital(500)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$500</button>
+                  <button type="button" onclick="setCalcSpotCapital(1000)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$1k</button>
+                </div>
+              </div>
+
+              <!-- Precio Objetivo Take Profit -->
+              <div class="flex flex-col gap-1">
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">Precio Objetivo (Take Profit):</span>
+                <div class="relative">
+                  <input id="calcSpotTp" type="number" step="0.01" oninput="recalcSpot()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-emerald-500 transition" placeholder="109.00">
+                  <span class="absolute right-3 top-2 text-xs font-mono text-slate-500">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono">
+                  <button type="button" onclick="setCalcSpotTpFromPreset('tp1')" class="px-1.5 py-0.5 rounded bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-800/60">TP1</button>
+                  <button type="button" onclick="setCalcSpotTpFromPreset('tp2')" class="px-1.5 py-0.5 rounded bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-800/60">TP2</button>
+                  <button type="button" onclick="setCalcSpotTpFromPreset('tp3')" class="px-1.5 py-0.5 rounded bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-800/60">TP3</button>
+                  <button type="button" onclick="setCalcSpotTpPct(5)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+5%</button>
+                  <button type="button" onclick="setCalcSpotTpPct(10)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+10%</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resultados en Vivo Spot -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-slate-800/80 text-xs font-mono">
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[10px] text-slate-400 block">SOL Comprados:</span>
+                <span id="calcSpotSolAmount" class="text-base font-bold text-white mt-0.5 block">0.0000 SOL</span>
+                <span class="text-[9px] text-slate-500">Activo 100% en posesión</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40">
+                <span class="text-[10px] text-emerald-400 block font-semibold">Ganancia Neta Estimada:</span>
+                <span id="calcSpotNetProfit" class="text-base font-bold text-emerald-400 mt-0.5 block">+$0.00 USDT</span>
+                <span id="calcSpotRoiPct" class="text-[10px] font-bold text-emerald-300">+0.00% ROI</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[10px] text-slate-400 block">Total al Vender en TP:</span>
+                <span id="calcSpotTotalReturn" class="text-base font-bold text-slate-200 mt-0.5 block">$0.00 USDT</span>
+                <span class="text-[9px] text-slate-500">Capital + Beneficio</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 flex flex-col justify-center text-[10px] text-slate-300 font-sans leading-tight">
+                <div class="flex items-center gap-1 font-bold text-emerald-400 mb-0.5 font-mono">
+                  <span>🛡️ Cero Liquidación</span>
+                </div>
+                <span>Spot no tiene margen ni liquidación. Si el mercado corrige, conservas todas tus monedas.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PESTAÑA 2: CALCULADORA FUTUROS -->
+          <div id="calcFutPanel" class="hidden flex flex-col gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <!-- Dirección & Entrada -->
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between text-[11px] font-mono">
+                  <span class="text-slate-400 font-semibold">Dirección & Entrada:</span>
+                  <div class="flex items-center gap-1">
+                    <button id="calcFutDirLong" type="button" onclick="setCalcFutDirection('LONG')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white transition">LONG</button>
+                    <button id="calcFutDirShort" type="button" onclick="setCalcFutDirection('SHORT')" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white transition">SHORT</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input id="calcFutEntry" type="number" step="0.01" oninput="recalcFut()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-indigo-500 transition" placeholder="104.00">
+                  <span class="absolute right-3 top-2 text-xs font-mono text-slate-500">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono">
+                  <button type="button" onclick="setCalcFutPriceCurrent()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700">Precio Actual</button>
+                  <button type="button" onclick="setCalcFutPriceFromTrigger()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700">Trigger Setup</button>
+                </div>
+              </div>
+
+              <!-- Margen Propio -->
+              <div class="flex flex-col gap-1">
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">Margen Propio (USDT):</span>
+                <div class="relative">
+                  <input id="calcFutMargin" type="number" step="10" value="50" oninput="recalcFut()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-indigo-500 transition" placeholder="50">
+                  <span class="absolute right-3 top-2 text-xs font-mono text-slate-500">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono text-slate-400">
+                  <button type="button" onclick="setCalcFutMargin(25)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$25</button>
+                  <button type="button" onclick="setCalcFutMargin(50)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$50</button>
+                  <button type="button" onclick="setCalcFutMargin(100)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$100</button>
+                  <button type="button" onclick="setCalcFutMargin(200)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">$200</button>
+                </div>
+              </div>
+
+              <!-- Apalancamiento -->
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between text-[11px] font-mono">
+                  <span class="text-slate-400 font-semibold">Apalancamiento:</span>
+                  <span id="calcFutLevLabel" class="text-amber-400 font-bold">10x</span>
+                </div>
+                <div class="relative flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input id="calcFutLev" type="range" min="2" max="25" step="1" value="10" oninput="onCalcFutLevChange(this.value)" class="w-full accent-indigo-500 cursor-pointer">
+                  <span id="calcFutLevDisplay" class="text-xs font-mono font-bold text-white min-w-[28px] text-right">10x</span>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono">
+                  <button type="button" onclick="setCalcFutLev(2)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">2x</button>
+                  <button type="button" onclick="setCalcFutLev(5)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">5x</button>
+                  <button type="button" onclick="setCalcFutLev(10)" class="px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/60 font-bold">10x</button>
+                  <button type="button" onclick="setCalcFutLev(20)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-rose-300">20x</button>
+                </div>
+              </div>
+
+              <!-- Take Profit & Stop Loss -->
+              <div class="flex flex-col gap-1">
+                <span class="text-[11px] font-mono text-slate-400 font-semibold">Metas TP y SL ($):</span>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <div class="relative">
+                    <input id="calcFutTp" type="number" step="0.01" oninput="recalcFut()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500 transition" placeholder="TP $">
+                    <span class="absolute right-1.5 top-2 text-[10px] font-mono text-slate-500">TP</span>
+                  </div>
+                  <div class="relative">
+                    <input id="calcFutSl" type="number" step="0.01" oninput="recalcFut()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-mono text-rose-400 focus:outline-none focus:border-rose-500 transition" placeholder="SL $">
+                    <span class="absolute right-1.5 top-2 text-[10px] font-mono text-slate-500">SL</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1 mt-0.5 text-[10px] font-mono">
+                  <button type="button" onclick="setCalcFutPresetsFromSetup('tp1')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400">TP1</button>
+                  <button type="button" onclick="setCalcFutPresetsFromSetup('tp2')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400">TP2</button>
+                  <button type="button" onclick="setCalcFutPresetsFromSetup('sl')" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-rose-400">SL Setup</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resultados en Vivo Futuros -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 pt-2 border-t border-slate-800/80 text-xs font-mono">
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[10px] text-slate-400 block">Posición Nocional:</span>
+                <span id="calcFutNotional" class="text-sm font-bold text-white mt-0.5 block">$500.00</span>
+                <span id="calcFutContracts" class="text-[9px] text-slate-500">~4.81 SOL con 10x</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40">
+                <span class="text-[10px] text-emerald-400 block font-semibold">Ganancia en TP:</span>
+                <span id="calcFutProfitUsd" class="text-sm font-bold text-emerald-400 mt-0.5 block">+$0.00 USDT</span>
+                <span id="calcFutProfitRoi" class="text-[10px] font-bold text-emerald-300">+0.0% ROI</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-rose-950/25 border border-rose-500/30">
+                <span class="text-[10px] text-rose-300 block font-semibold">Pérdida en SL:</span>
+                <span id="calcFutLossUsd" class="text-sm font-bold text-rose-400 mt-0.5 block">-$0.00 USDT</span>
+                <span id="calcFutLossRoi" class="text-[10px] font-bold text-rose-300">-0.0% ROI</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                <span class="text-[10px] text-amber-300 block font-semibold">Ratio Riesgo / Retorno:</span>
+                <span id="calcFutRatioRR" class="text-sm font-bold text-amber-400 mt-0.5 block">R:R 1:0.0</span>
+                <span class="text-[9px] text-slate-400">Eficiencia técnica</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30">
+                <span class="text-[10px] text-amber-400 block font-semibold">⚠️ Liq. Estimada:</span>
+                <span id="calcFutLiqPrice" class="text-sm font-bold text-amber-300 mt-0.5 block">$0.00</span>
+                <span class="text-[9px] text-slate-400">Margen Aislado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- COLUMNA DERECHA: LOS 2 PANELES (SPOT Y FUTUROS) (4 COLS) -->
@@ -158,17 +372,16 @@
             </div>
           </div>
 
-          <!-- Stop Loss Recomendado -->
-          <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-500/30 text-xs font-mono flex items-center justify-between">
-            <div>
-              <span class="text-[10px] text-rose-300 font-semibold block uppercase">Stop Loss Recomendado (SL):</span>
-              <span id="spotStopLoss" class="text-sm font-bold text-rose-400">$0.00</span>
-              <span class="text-[9px] text-slate-400 block mt-0.5">Debajo de invalidación 15m</span>
+          <!-- Modalidad Spot Sin Liquidación -->
+          <div class="p-2.5 rounded-xl bg-emerald-950/25 border border-emerald-500/30 text-xs font-mono flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <div>
+                <span class="text-[10px] text-emerald-300 font-semibold block uppercase">Modalidad Spot: Cero Liquidación</span>
+                <span class="text-[10px] text-slate-300 block mt-0.5">Activo real 100% en billetera · Compras escalonadas para acumulación</span>
+              </div>
             </div>
-            <div class="text-right">
-              <span class="text-[10px] text-slate-400 block">Distancia SL:</span>
-              <span id="spotSlDist" class="text-xs font-bold text-rose-300">-$0.00 (-0.0%)</span>
-            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">SIN STOP LOSS</span>
           </div>
 
           <!-- Take Profits Recomendados -->
@@ -942,6 +1155,29 @@
     // Actualizar Paneles de Spot y Futuros en Vivo
     function updateTradingPanels(setups, solPrice) {
       if (!setups) return;
+      cachedTradingSetups = setups;
+      if (solPrice > 0) currentLiveSolPrice = solPrice;
+
+      // Auto-inicializar calculadora con valores por defecto si est vacia
+      const spotEntryInput = document.getElementById('calcSpotEntry');
+      if (spotEntryInput && (!spotEntryInput.value || spotEntryInput.value === '0')) {
+        spotEntryInput.value = (setups.spot && setups.spot.entry_optimal) ? setups.spot.entry_optimal.toFixed(2) : (solPrice > 0 ? solPrice.toFixed(2) : '104.00');
+        if (setups.spot && setups.spot.tp1) {
+          document.getElementById('calcSpotTp').value = setups.spot.tp1.toFixed(2);
+        }
+        recalcSpot();
+      }
+
+      const futEntryInput = document.getElementById('calcFutEntry');
+      if (futEntryInput && (!futEntryInput.value || futEntryInput.value === '0')) {
+        if (setups.futures) {
+          futEntryInput.value = setups.futures.entry_trigger ? setups.futures.entry_trigger.toFixed(2) : (solPrice > 0 ? solPrice.toFixed(2) : '104.00');
+          if (setups.futures.tp1) document.getElementById('calcFutTp').value = setups.futures.tp1.toFixed(2);
+          if (setups.futures.stop_loss) document.getElementById('calcFutSl').value = setups.futures.stop_loss.toFixed(2);
+          if (setups.futures.direction) setCalcFutDirection(setups.futures.direction);
+        }
+        recalcFut();
+      }
 
       const spot = setups.spot;
       if (spot) {
@@ -1030,6 +1266,216 @@
 
         const liq5xEl = document.getElementById('futLiq5x');
         if (liq5xEl) liq5xEl.innerText = `$${fut.est_liq_5x.toFixed(2)}`;
+      }
+    }
+
+  
+    // ==========================================
+    // CALCULADORA DE GANANCIAS (SPOT & FUTUROS)
+    // ==========================================
+    let currentLiveSolPrice = 0;
+    let cachedTradingSetups = null;
+    let calcFutDirection = 'LONG';
+
+    function switchCalcTab(tab) {
+      const spotBtn = document.getElementById('calcTabSpotBtn');
+      const futBtn = document.getElementById('calcTabFutBtn');
+      const spotPanel = document.getElementById('calcSpotPanel');
+      const futPanel = document.getElementById('calcFutPanel');
+
+      if (tab === 'spot') {
+        spotBtn.className = 'px-3 py-1 rounded-lg bg-emerald-600 text-white shadow-sm transition flex items-center gap-1.5';
+        futBtn.className = 'px-3 py-1 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5';
+        spotPanel.classList.remove('hidden');
+        futPanel.classList.add('hidden');
+        recalcSpot();
+      } else {
+        futBtn.className = 'px-3 py-1 rounded-lg bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5';
+        spotBtn.className = 'px-3 py-1 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5';
+        futPanel.classList.remove('hidden');
+        spotPanel.classList.add('hidden');
+        recalcFut();
+      }
+    }
+
+    function setCalcSpotPriceCurrent() {
+      if (currentLiveSolPrice > 0) {
+        document.getElementById('calcSpotEntry').value = currentLiveSolPrice.toFixed(2);
+        recalcSpot();
+      }
+    }
+
+    function setCalcSpotEntryFromOB(type) {
+      if (cachedTradingSetups && cachedTradingSetups.spot) {
+        const val = type === 'opt' ? cachedTradingSetups.spot.entry_optimal : cachedTradingSetups.spot.entry_secondary;
+        if (val) {
+          document.getElementById('calcSpotEntry').value = val.toFixed(2);
+          recalcSpot();
+        }
+      }
+    }
+
+    function setCalcSpotCapital(val) {
+      document.getElementById('calcSpotCapital').value = val;
+      recalcSpot();
+    }
+
+    function setCalcSpotTpFromPreset(key) {
+      if (cachedTradingSetups && cachedTradingSetups.spot && cachedTradingSetups.spot[key]) {
+        document.getElementById('calcSpotTp').value = cachedTradingSetups.spot[key].toFixed(2);
+        recalcSpot();
+      }
+    }
+
+    function setCalcSpotTpPct(pct) {
+      const entry = parseFloat(document.getElementById('calcSpotEntry').value) || currentLiveSolPrice || 100;
+      const tp = entry * (1 + pct / 100.0);
+      document.getElementById('calcSpotTp').value = tp.toFixed(2);
+      recalcSpot();
+    }
+
+    function recalcSpot() {
+      const entry = parseFloat(document.getElementById('calcSpotEntry').value) || 0;
+      const capital = parseFloat(document.getElementById('calcSpotCapital').value) || 0;
+      const tp = parseFloat(document.getElementById('calcSpotTp').value) || 0;
+
+      if (entry > 0 && capital > 0) {
+        const solAmount = capital / entry;
+        document.getElementById('calcSpotSolAmount').innerText = `${solAmount.toFixed(4)} SOL`;
+
+        if (tp > 0) {
+          const profitUsd = (tp - entry) * solAmount;
+          const roiPct = ((tp - entry) / entry) * 100.0;
+          const totalReturn = capital + profitUsd;
+
+          const pEl = document.getElementById('calcSpotNetProfit');
+          pEl.innerText = `${profitUsd >= 0 ? '+' : ''}$${profitUsd.toFixed(2)} USDT`;
+          pEl.className = profitUsd >= 0 ? 'text-base font-bold text-emerald-400 mt-0.5 block' : 'text-base font-bold text-rose-400 mt-0.5 block';
+
+          const rEl = document.getElementById('calcSpotRoiPct');
+          rEl.innerText = `${roiPct >= 0 ? '+' : ''}${roiPct.toFixed(2)}% ROI`;
+          rEl.className = roiPct >= 0 ? 'text-[10px] font-bold text-emerald-300' : 'text-[10px] font-bold text-rose-300';
+
+          document.getElementById('calcSpotTotalReturn').innerText = `$${totalReturn.toFixed(2)} USDT`;
+        }
+      }
+    }
+
+    function setCalcFutDirection(dir) {
+      calcFutDirection = dir;
+      const btnLong = document.getElementById('calcFutDirLong');
+      const btnShort = document.getElementById('calcFutDirShort');
+
+      if (dir === 'LONG') {
+        btnLong.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white transition';
+        btnShort.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white transition';
+      } else {
+        btnShort.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white transition';
+        btnLong.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 hover:text-white transition';
+      }
+      recalcFut();
+    }
+
+    function setCalcFutPriceCurrent() {
+      if (currentLiveSolPrice > 0) {
+        document.getElementById('calcFutEntry').value = currentLiveSolPrice.toFixed(2);
+        recalcFut();
+      }
+    }
+
+    function setCalcFutPriceFromTrigger() {
+      if (cachedTradingSetups && cachedTradingSetups.futures && cachedTradingSetups.futures.entry_trigger) {
+        document.getElementById('calcFutEntry').value = cachedTradingSetups.futures.entry_trigger.toFixed(2);
+        recalcFut();
+      }
+    }
+
+    function setCalcFutMargin(val) {
+      document.getElementById('calcFutMargin').value = val;
+      recalcFut();
+    }
+
+    function onCalcFutLevChange(val) {
+      document.getElementById('calcFutLevLabel').innerText = `${val}x`;
+      document.getElementById('calcFutLevDisplay').innerText = `${val}x`;
+      recalcFut();
+    }
+
+    function setCalcFutLev(val) {
+      document.getElementById('calcFutLev').value = val;
+      onCalcFutLevChange(val);
+    }
+
+    function setCalcFutPresetsFromSetup(type) {
+      if (!cachedTradingSetups || !cachedTradingSetups.futures) return;
+      const fut = cachedTradingSetups.futures;
+      if (type === 'tp1' && fut.tp1) {
+        document.getElementById('calcFutTp').value = fut.tp1.toFixed(2);
+      } else if (type === 'tp2' && fut.tp2) {
+        document.getElementById('calcFutTp').value = fut.tp2.toFixed(2);
+      } else if (type === 'sl' && fut.stop_loss) {
+        document.getElementById('calcFutSl').value = fut.stop_loss.toFixed(2);
+      }
+      recalcFut();
+    }
+
+    function recalcFut() {
+      const dir = calcFutDirection;
+      const entry = parseFloat(document.getElementById('calcFutEntry').value) || 0;
+      const margin = parseFloat(document.getElementById('calcFutMargin').value) || 0;
+      const lev = parseInt(document.getElementById('calcFutLev').value) || 10;
+      const tp = parseFloat(document.getElementById('calcFutTp').value) || 0;
+      const sl = parseFloat(document.getElementById('calcFutSl').value) || 0;
+
+      const notional = margin * lev;
+      document.getElementById('calcFutNotional').innerText = `$${notional.toFixed(2)}`;
+
+      if (entry > 0) {
+        const solQty = notional / entry;
+        document.getElementById('calcFutContracts').innerText = `~${solQty.toFixed(2)} SOL con ${lev}x`;
+
+        let profitUsd = 0;
+        let profitRoi = 0;
+        if (tp > 0) {
+          const diff = dir === 'LONG' ? (tp - entry) : (entry - tp);
+          profitUsd = diff * solQty;
+          profitRoi = (profitUsd / margin) * 100.0;
+
+          const pEl = document.getElementById('calcFutProfitUsd');
+          pEl.innerText = `${profitUsd >= 0 ? '+' : '-'}$${Math.abs(profitUsd).toFixed(2)} USDT`;
+          pEl.className = profitUsd >= 0 ? 'text-sm font-bold text-emerald-400 mt-0.5 block' : 'text-sm font-bold text-rose-400 mt-0.5 block';
+
+          const rEl = document.getElementById('calcFutProfitRoi');
+          rEl.innerText = `${profitRoi >= 0 ? '+' : '-'}${Math.abs(profitRoi).toFixed(1)}% ROI`;
+          rEl.className = profitRoi >= 0 ? 'text-[10px] font-bold text-emerald-300' : 'text-[10px] font-bold text-rose-300';
+        }
+
+        let lossUsd = 0;
+        let lossRoi = 0;
+        if (sl > 0) {
+          const diffSl = dir === 'LONG' ? (entry - sl) : (sl - entry);
+          lossUsd = diffSl * solQty;
+          lossRoi = (lossUsd / margin) * 100.0;
+
+          document.getElementById('calcFutLossUsd').innerText = `-$${Math.abs(lossUsd).toFixed(2)} USDT`;
+          document.getElementById('calcFutLossRoi').innerText = `-${Math.abs(lossRoi).toFixed(1)}% ROI`;
+        }
+
+        if (profitUsd > 0 && lossUsd > 0) {
+          const ratio = (profitUsd / lossUsd).toFixed(1);
+          document.getElementById('calcFutRatioRR').innerText = `R:R 1:${ratio}`;
+        } else {
+          document.getElementById('calcFutRatioRR').innerText = 'R:R 1:3.0';
+        }
+
+        // Estimación de Precio de Liquidación Aislada
+        let liq = 0;
+        if (dir === 'LONG') {
+          liq = entry * (1 - (1.0 / lev) + 0.005);
+        } else {
+          liq = entry * (1 + (1.0 / lev) - 0.005);
+        }
+        document.getElementById('calcFutLiqPrice').innerText = `$${Math.max(liq, 0).toFixed(2)}`;
       }
     }
 
