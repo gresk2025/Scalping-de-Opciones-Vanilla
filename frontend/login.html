@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso al Sistema | Scalping de Opciones Vanilla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #080B11; color: #E2E8F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+  
+  <!-- Efectos de fondo sutiles -->
+  <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="glass-panel rounded-3xl max-w-sm w-full p-8 shadow-2xl relative z-10 flex flex-col gap-6">
+    <div class="text-center flex flex-col items-center gap-2.5">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+      </div>
+      <h1 class="text-lg font-bold text-white tracking-tight">Acceso al Dashboard</h1>
+      <p class="text-xs text-slate-400">Scalping de Opciones Vanilla (SOL/USDT)</p>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-4 text-xs">
+      <div>
+        <label class="block text-slate-300 font-semibold mb-1.5">Usuario:</label>
+        <input type="text" id="username" required autocomplete="username" placeholder="Ingresa tu usuario"
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 font-medium focus:border-indigo-500 focus:outline-none transition">
+      </div>
+
+      <div>
+        <label class="block text-slate-300 font-semibold mb-1.5">Contraseña:</label>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••••••"
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 font-medium focus:border-indigo-500 focus:outline-none transition">
+      </div>
+
+      <div id="errorAlert" class="hidden p-3 rounded-xl bg-rose-950/80 border border-rose-800 text-rose-300 text-xs">
+        Usuario o contraseña incorrectos.
+      </div>
+
+      <button type="submit" id="btnSubmit" class="w-full py-3 rounded-xl font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-600/25 mt-2 flex items-center justify-center gap-2">
+        <span>Iniciar Sesión</span>
+      </button>
+    </form>
+
+    <div class="text-center text-[11px] text-slate-500 border-t border-slate-800/80 pt-4">
+      Instancia VPS Oracle Cloud • Protección Criptográfica
+    </div>
+  </div>
+
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      const btn = document.getElementById('btnSubmit');
+      const err = document.getElementById('errorAlert');
+
+      btn.innerText = 'Verificando...';
+      btn.disabled = true;
+      err.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          err.classList.remove('hidden');
+          btn.innerText = 'Iniciar Sesión';
+          btn.disabled = false;
+        }
+      } catch (ex) {
+        err.innerText = 'Error de conexión con el servidor.';
+        err.classList.remove('hidden');
+        btn.innerText = 'Iniciar Sesión';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

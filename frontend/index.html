@@ -1,0 +1,705 @@
+﻿<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scalping de Opciones Vanilla | SOL/USDT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              dark: '#080B11',
+              card: '#0F1523',
+              cardBorder: '#1E293B',
+              accent: '#6366F1',
+              bull: '#10B981',
+              bear: '#F43F5E',
+              paper: '#0284C7',
+              warning: '#F59E0B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #080B11; color: #E2E8F0; }
+    .glass-panel { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.4); }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+    @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .animate-pulse-slow { animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-accent selection:text-white pb-12">
+
+  <div id="modeBanner" class="w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50">
+    <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
+    <span id="modeBannerText">🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)</span>
+  </div>
+
+  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            Scalping Opciones Vanilla
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">SOL / USDT</span>
+          </h1>
+          <p class="text-xs text-slate-400">Estrategia Smart Money Concepts (OB + FVG + Fib 0.618)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <div id="botStatusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="botStatusText">ACTIVO</span>
+        </div>
+
+        <button id="btnToggleMode" onclick="toggleTradingMode()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+          <span id="modeToggleLabel">Cambiar a Modo Real</span>
+        </button>
+
+        <button id="btnTogglePause" onclick="toggleBotPause()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="pauseBtnText">Pausar</span>
+        </button>
+
+        <button onclick="openConfigModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span>Configurar API</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 flex flex-col gap-5 w-full">
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>Precio SOL</span>
+          <span id="wsStatusDot" class="w-2 h-2 rounded-full bg-emerald-400" title="WebSocket Conectado"></span>
+        </div>
+        <div class="mt-1">
+          <div id="solPrice" class="text-xl md:text-2xl font-bold font-mono text-white transition-colors duration-200">$0.00</div>
+          <div id="solChange" class="text-xs font-mono text-emerald-400 font-semibold">+0.00%</div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span>PnL Hoy</span>
+          <span class="text-[10px] text-amber-400/80">Límite -$5.00</span>
+        </div>
+        <div class="mt-1">
+          <div id="pnlToday" class="text-xl md:text-2xl font-bold font-mono text-slate-200">$0.00</div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1.5 overflow-hidden">
+            <div id="pnlRiskBar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="text-xs text-slate-400">PnL Total Acumulado</div>
+        <div class="mt-1">
+          <div id="pnlTotal" class="text-xl md:text-2xl font-bold font-mono text-white">$0.00</div>
+          <div id="tradesCount" class="text-xs text-slate-400 font-mono">0 operaciones</div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between">
+        <div class="text-xs text-slate-400">Tasa de Acierto</div>
+        <div class="mt-1">
+          <div id="winRate" class="text-xl md:text-2xl font-bold font-mono text-indigo-400">0.0%</div>
+          <div id="winLossRatio" class="text-xs text-slate-400 font-mono">0W - 0L</div>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col justify-between col-span-2 md:col-span-1">
+        <div class="text-xs text-slate-400">Gestión de Riesgo</div>
+        <div class="mt-1">
+          <div id="contractsCountLabel" class="text-base font-bold text-white">5 Contratos</div>
+          <div class="text-[11px] text-slate-400">Capital por trade: ~$4 - $5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+            <h2 class="text-sm font-bold text-white">Gráfico en Vivo (Velas 15M)</h2>
+            <span class="text-xs text-slate-400 font-mono">SOL/USDT</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">■ Bullish OB</span>
+            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">■ Bearish OB</span>
+          </div>
+        </div>
+
+        <div id="chartContainer" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-950/80 relative">
+          <div id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-10 text-xs text-slate-400">
+            Conectando con Binance WebSocket y cargando velas...
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+              Cerebro SMC & Confluencias
+            </h3>
+            <div id="confluenceBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+              0%
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Nivel de Confluencia Institucional</span>
+              <span id="confluenceThreshold">Umbral mínimo: 70%</span>
+            </div>
+            <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
+              <div id="confluenceBar" class="h-full bg-gradient-to-r from-slate-600 via-indigo-500 to-emerald-400 transition-all duration-500 w-0"></div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80">
+            <div class="text-[11px] font-semibold text-slate-400 mb-1">Análisis Técnico en Tiempo Real:</div>
+            <p id="smcRationale" class="text-xs text-slate-200 leading-relaxed">
+              Analizando estructura de mercado y esperando confluencia en temporalidad 15M...
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div id="tagOB" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Order Blocks
+            </div>
+            <div id="tagFVG" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> FVG Imbalances
+            </div>
+            <div id="tagFib" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Fib 0.618 / 0.705
+            </div>
+            <div id="tagTrend" class="p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Estructura
+            </div>
+          </div>
+        </div>
+
+        <div id="activeTradeCard" class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border-indigo-500/30">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Operación en Curso</span>
+            <span id="activeTradeTypeBadge" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              CALL
+            </span>
+          </div>
+
+          <div id="noActiveTradeMsg" class="py-6 text-center text-xs text-slate-400">
+            <span class="inline-block animate-pulse mb-1 text-slate-500 text-lg">📡</span>
+            <p>No hay operación abierta en este momento.</p>
+            <p class="text-[11px] text-slate-500 mt-1">El bot abrirá contrato automáticamente al confluir la señal.</p>
+          </div>
+
+          <div id="activeTradeDetails" class="hidden flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div id="activeSymbol" class="text-sm font-bold text-white font-mono">SOL-P-100</div>
+                <div class="text-[11px] text-slate-400"><span id="activeContracts">5</span> contratos</div>
+              </div>
+              <div class="text-right">
+                <div id="activeLivePnl" class="text-lg font-bold font-mono text-emerald-400">+$0.00</div>
+                <div id="activeLivePnlPct" class="text-xs font-mono text-emerald-400 font-semibold">+0.0%</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 font-mono">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Prima Entrada:</span>
+                <span id="activeEntryPremium" class="text-slate-200 font-semibold">$0.00</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Prima Actual:</span>
+                <span id="activeCurrentPremium" class="text-slate-200 font-semibold">$0.00</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+              <span>Tiempo en mercado:</span>
+              <span id="activeElapsedTimer" class="text-amber-400 font-bold">0m / 90m</span>
+            </div>
+
+            <button onclick="closeActiveTradeManual()" class="w-full py-2 rounded-xl text-xs font-semibold bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 transition">
+              Cerrar Operación Inmediatamente
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Historial de Operaciones
+          </h3>
+          <span class="text-xs text-slate-500 font-mono">Últimas 50 operaciones</span>
+        </div>
+
+        <div class="overflow-x-auto custom-scroll max-h-[260px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="text-[11px] text-slate-400 uppercase bg-slate-900/60 sticky top-0">
+              <tr>
+                <th class="py-2 px-3">Hora</th>
+                <th class="py-2 px-3">Tipo</th>
+                <th class="py-2 px-3">Strike</th>
+                <th class="py-2 px-3">Lote</th>
+                <th class="py-2 px-3">Prima Ent/Sal</th>
+                <th class="py-2 px-3">PnL Neto</th>
+                <th class="py-2 px-3">Razón</th>
+                <th class="py-2 px-3">Modo</th>
+              </tr>
+            </thead>
+            <tbody id="tradesTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+            Terminal de Logs
+          </h3>
+          <span class="text-[10px] text-slate-500 font-mono">Eventos en vivo</span>
+        </div>
+
+        <div id="terminalLog" class="p-3 rounded-xl bg-slate-950 font-mono text-[11px] h-[260px] overflow-y-auto custom-scroll flex flex-col gap-1.5 text-slate-300">
+          <div class="text-slate-500">> Sistema iniciado. Conectando...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="configModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>⚙️</span> Configuración de Binance Opciones
+        </h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Ingresa tus claves de API cuando decidas operar en <strong>Modo Real</strong>. El sistema probará la conexión y los permisos de opciones antes de guardar.
+      </p>
+
+      <div class="flex flex-col gap-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Binance API Key:</label>
+          <input type="text" id="inputApiKey" placeholder="Pega tu API Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Binance Secret Key:</label>
+          <input type="password" id="inputApiSecret" placeholder="Pega tu Secret Key de Binance" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono focus:border-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-slate-400 text-[11px] mb-1">Lote (Contratos):</label>
+            <input type="number" id="inputContracts" min="1" max="10" value="5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 text-[11px] mb-1">Máx Pérdida Diaria ($):</label>
+            <input type="number" id="inputMaxLoss" min="1" max="20" step="0.5" value="5.0" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+          </div>
+        </div>
+
+        <div id="testConnectionResult" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+        <button onclick="closeConfigModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+          Cancelar
+        </button>
+        <button id="btnSaveConfig" onclick="saveBinanceConfig()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/30">
+          <span>Probar y Guardar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let chart, candleSeries;
+    let ws = null;
+    let isPaperMode = true;
+    let currentBotState = null;
+
+    function initChart() {
+      const container = document.getElementById('chartContainer');
+      chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        layout: {
+          background: { color: '#090D16' },
+          textColor: '#94A3B8',
+          fontSize: 11,
+          fontFamily: '"JetBrains Mono", monospace'
+        },
+        grid: {
+          vertLines: { color: 'rgba(30, 41, 59, 0.5)' },
+          horzLines: { color: 'rgba(30, 41, 59, 0.5)' }
+        },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        rightPriceScale: { borderColor: 'rgba(51, 65, 85, 0.6)' },
+        timeScale: { borderColor: 'rgba(51, 65, 85, 0.6)', timeVisible: true, secondsVisible: false }
+      });
+
+      candleSeries = chart.addCandlestickSeries({
+        upColor: '#10B981',
+        downColor: '#F43F5E',
+        borderUpColor: '#10B981',
+        borderDownColor: '#F43F5E',
+        wickUpColor: '#10B981',
+        wickDownColor: '#F43F5E'
+      });
+
+      window.addEventListener('resize', () => {
+        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+      });
+
+      loadInitialKlines();
+    }
+
+    async function loadInitialKlines() {
+      try {
+        const res = await fetch('/api/klines');
+        if (res.ok) {
+          const klines = await res.json();
+          if (klines && klines.length > 0) {
+            candleSeries.setData(klines);
+            document.getElementById('chartLoading').classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.error('Error cargando klines:', e);
+      }
+    }
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
+      };
+
+      ws.onmessage = (event) => {
+        const state = JSON.parse(event.data);
+        updateDashboard(state);
+      };
+
+      ws.onclose = () => {
+        document.getElementById('wsStatusDot').className = 'w-2 h-2 rounded-full bg-rose-400 animate-ping';
+        setTimeout(connectWebSocket, 2000);
+      };
+
+      ws.onerror = () => { ws.close(); };
+    }
+
+    function updateDashboard(state) {
+      currentBotState = state;
+      isPaperMode = state.paper_trading;
+
+      const banner = document.getElementById('modeBanner');
+      const bannerText = document.getElementById('modeBannerText');
+      const modeBtnLabel = document.getElementById('modeToggleLabel');
+
+      if (isPaperMode) {
+        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-sky-950/80 text-sky-300 border-b border-sky-800/50';
+        bannerText.innerHTML = '🧪 MODO PAPER TRADING (SIMULACIÓN) — CAPITAL 100% PROTEGIDO (Datos reales de Binance sin riesgo)';
+        modeBtnLabel.innerText = 'Cambiar a Modo Real';
+      } else {
+        banner.className = 'w-full transition-all duration-300 py-2.5 px-4 text-center font-bold text-xs md:text-sm tracking-wide flex items-center justify-center gap-3 bg-rose-950/90 text-rose-300 border-b border-rose-800 animate-pulse-slow';
+        bannerText.innerHTML = '⚠️ MODO REAL ACTIVO — DINERO EN RIESGO REAL (Conectado a Binance Vanilla Options)';
+        modeBtnLabel.innerText = 'Cambiar a Simulación';
+      }
+
+      const statusBadge = document.getElementById('botStatusBadge');
+      const statusText = document.getElementById('botStatusText');
+      const pauseText = document.getElementById('pauseBtnText');
+
+      if (state.status === 'RUNNING') {
+        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60';
+        statusText.innerText = 'ACTIVO';
+        pauseText.innerText = 'Pausar';
+      } else if (state.status === 'CIRCUIT_BREAKER') {
+        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-950/80 text-rose-300 border border-rose-800 animate-pulse';
+        statusText.innerText = 'CIRCUITO DISPARADO (-$5.00)';
+        pauseText.innerText = 'Resetear Circuito';
+      } else {
+        statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-950/60 text-amber-400 border border-amber-800/60';
+        statusText.innerText = 'PAUSADO';
+        pauseText.innerText = 'Reanudar';
+      }
+
+      const priceEl = document.getElementById('solPrice');
+      priceEl.innerText = `$${state.sol_price.toFixed(2)}`;
+      const changeEl = document.getElementById('solChange');
+      const chg = state.price_change_24h;
+      changeEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
+      changeEl.className = chg >= 0 ? 'text-xs font-mono text-emerald-400 font-semibold' : 'text-xs font-mono text-rose-400 font-semibold';
+
+      const pnlTodayEl = document.getElementById('pnlToday');
+      const dp = state.stats.daily_pnl;
+      pnlTodayEl.innerText = `${dp >= 0 ? '+' : ''}$${dp.toFixed(2)}`;
+      pnlTodayEl.className = `text-xl md:text-2xl font-bold font-mono ${dp >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      const riskPct = Math.min(Math.max((Math.abs(Math.min(dp, 0)) / state.settings.max_daily_loss) * 100, 0), 100);
+      const riskBar = document.getElementById('pnlRiskBar');
+      riskBar.style.width = `${riskPct}%`;
+      riskBar.className = riskPct > 70 ? 'bg-rose-500 h-full' : (riskPct > 40 ? 'bg-amber-500 h-full' : 'bg-emerald-500 h-full');
+
+      const totPnl = state.stats.total_pnl;
+      const pnlTotEl = document.getElementById('pnlTotal');
+      pnlTotEl.innerText = `${totPnl >= 0 ? '+' : ''}$${totPnl.toFixed(2)}`;
+      pnlTotEl.className = `text-xl md:text-2xl font-bold font-mono ${totPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      document.getElementById('tradesCount').innerText = `${state.stats.total_trades} operaciones`;
+      document.getElementById('winRate').innerText = `${state.stats.win_rate}%`;
+      document.getElementById('winLossRatio').innerText = `${state.stats.wins}W - ${state.stats.losses}L`;
+      document.getElementById('contractsCountLabel').innerText = `${state.settings.default_contracts} Contratos`;
+
+      const ans = state.analysis;
+      document.getElementById('confluenceBadge').innerText = `${ans.confidence}%`;
+      document.getElementById('confluenceBar').style.width = `${ans.confidence}%`;
+      document.getElementById('smcRationale').innerText = ans.rationale;
+
+      const obTag = document.getElementById('tagOB');
+      if (ans.order_blocks && ans.order_blocks.length > 0) {
+        obTag.className = 'p-2 rounded-lg bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 flex items-center gap-1.5';
+      } else {
+        obTag.className = 'p-2 rounded-lg bg-slate-800/50 border border-slate-700/40 text-slate-400 flex items-center gap-1.5';
+      }
+
+      const active = state.active_trade;
+      const noTrade = document.getElementById('noActiveTradeMsg');
+      const tradeDetails = document.getElementById('activeTradeDetails');
+
+      if (active) {
+        noTrade.classList.add('hidden');
+        tradeDetails.classList.remove('hidden');
+
+        const typeBadge = document.getElementById('activeTradeTypeBadge');
+        typeBadge.innerText = active.option_type;
+        typeBadge.className = active.option_type === 'CALL'
+          ? 'text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+          : 'text-xs font-bold font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30';
+
+        document.getElementById('activeSymbol').innerText = active.symbol;
+        document.getElementById('activeContracts').innerText = active.contracts;
+        document.getElementById('activeEntryPremium').innerText = `$${active.entry_premium.toFixed(2)}`;
+        document.getElementById('activeCurrentPremium').innerText = `$${active.current_premium.toFixed(2)}`;
+
+        const pnl = active.unrealized_pnl_usd;
+        const pnlPct = active.unrealized_pnl_pct;
+        const livePnlEl = document.getElementById('activeLivePnl');
+        const livePnlPctEl = document.getElementById('activeLivePnlPct');
+
+        livePnlEl.innerText = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
+        livePnlPctEl.innerText = `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%`;
+
+        const colorClass = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
+        livePnlEl.className = `text-lg font-bold font-mono ${colorClass}`;
+        livePnlPctEl.className = `text-xs font-mono font-semibold ${colorClass}`;
+
+        document.getElementById('activeElapsedTimer').innerText = `${active.elapsed_minutes}m / ${active.max_minutes}m`;
+      } else {
+        noTrade.classList.remove('hidden');
+        tradeDetails.classList.add('hidden');
+      }
+
+      if (state.recent_logs) {
+        renderTerminalLogs(state.recent_logs);
+      }
+    }
+
+    function renderTerminalLogs(logs) {
+      const term = document.getElementById('terminalLog');
+      term.innerHTML = '';
+      logs.forEach(l => {
+        const div = document.createElement('div');
+        let color = 'text-slate-300';
+        if (l.level === 'SUCCESS') color = 'text-emerald-400';
+        if (l.level === 'WARN') color = 'text-amber-400';
+        if (l.level === 'ERROR') color = 'text-rose-400';
+
+        div.className = `${color} leading-relaxed`;
+        div.innerHTML = `<span class="text-slate-500">[${l.timestamp}]</span> <span class="font-bold">[${l.level}]</span> ${l.message}`;
+        term.appendChild(div);
+      });
+      term.scrollTop = term.scrollHeight;
+    }
+
+    async function loadTradeHistory() {
+      try {
+        const res = await fetch('/api/history');
+        if (res.ok) {
+          const trades = await res.json();
+          const tbody = document.getElementById('tradesTableBody');
+          if (trades.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500 text-xs">Sin operaciones registradas todavía.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = '';
+          trades.forEach(t => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-800/30 transition';
+            const sign = t.pnl_usd >= 0 ? '+' : '';
+            const pnlColor = t.pnl_usd >= 0 ? 'text-emerald-400' : 'text-rose-400';
+            const typeColor = t.option_type === 'CALL' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
+
+            const timeStr = t.exit_time ? t.exit_time.split('T')[1].substring(0, 8) : '--:--:--';
+
+            tr.innerHTML = `
+              <td class="py-2.5 px-3 text-slate-400">${timeStr}</td>
+              <td class="py-2.5 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${typeColor}">${t.option_type}</span></td>
+              <td class="py-2.5 px-3 font-semibold text-white">$${t.strike}</td>
+              <td class="py-2.5 px-3">${t.contracts}</td>
+              <td class="py-2.5 px-3 text-slate-400">$${t.entry_premium.toFixed(2)} → $${t.exit_premium ? t.exit_premium.toFixed(2) : '-'}</td>
+              <td class="py-2.5 px-3 font-bold ${pnlColor}">${sign}$${t.pnl_usd ? t.pnl_usd.toFixed(2) : '0.00'} (${sign}${t.pnl_pct ? t.pnl_pct.toFixed(1) : '0'}%)</td>
+              <td class="py-2.5 px-3 text-slate-400">${t.exit_reason || '-'}</td>
+              <td class="py-2.5 px-3">${t.is_paper ? '<span class="text-sky-400">Paper</span>' : '<span class="text-rose-400">Real</span>'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        console.error('Error cargando historial:', e);
+      }
+    }
+
+    async function toggleTradingMode() {
+      const newMode = !isPaperMode;
+      const res = await fetch('/api/control/mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paper: newMode })
+      });
+      if (res.ok) {
+        loadTradeHistory();
+      }
+    }
+
+    async function toggleBotPause() {
+      await fetch('/api/control/toggle', { method: 'POST' });
+    }
+
+    async function closeActiveTradeManual() {
+      if (confirm('¿Deseas cerrar inmediatamente la posición abierta a precio de mercado?')) {
+        await fetch('/api/control/close_active', { method: 'POST' });
+        loadTradeHistory();
+      }
+    }
+
+    function openConfigModal() {
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    async function saveBinanceConfig() {
+      const apiKey = document.getElementById('inputApiKey').value;
+      const apiSecret = document.getElementById('inputApiSecret').value;
+      const contracts = parseInt(document.getElementById('inputContracts').value);
+      const maxLoss = parseFloat(document.getElementById('inputMaxLoss').value);
+      const resultBox = document.getElementById('testConnectionResult');
+      const saveBtn = document.getElementById('btnSaveConfig');
+
+      saveBtn.innerText = 'Probando conexión...';
+      saveBtn.disabled = true;
+
+      try {
+        await fetch('/api/control/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ default_contracts: contracts, max_daily_loss: maxLoss })
+        });
+
+        if (apiKey || apiSecret) {
+          const res = await fetch('/api/config/binance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: apiKey, api_secret: apiSecret })
+          });
+          const data = await res.json();
+
+          resultBox.classList.remove('hidden');
+          if (data.success) {
+            resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-emerald-950/80 text-emerald-300 border border-emerald-800';
+            resultBox.innerHTML = `✓ ${data.message}`;
+            setTimeout(closeConfigModal, 2000);
+          } else {
+            resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+            resultBox.innerHTML = `✗ ${data.message}`;
+          }
+        } else {
+          resultBox.classList.remove('hidden');
+          resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-slate-800 text-slate-300';
+          resultBox.innerHTML = 'Parámetros guardados correctamente.';
+          setTimeout(closeConfigModal, 1200);
+        }
+      } catch (e) {
+        resultBox.classList.remove('hidden');
+        resultBox.className = 'p-3 rounded-xl text-xs font-mono bg-rose-950/80 text-rose-300 border border-rose-800';
+        resultBox.innerHTML = `Error: ${e.message}`;
+      } finally {
+        saveBtn.innerText = 'Probar y Guardar';
+        saveBtn.disabled = false;
+      }
+    }
+
+    async function handleLogout() { await fetch('/api/auth/logout', { method: 'POST' }); window.location.href = '/login'; }
+    window.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      connectWebSocket();
+      loadTradeHistory();
+      setInterval(loadTradeHistory, 10000);
+    });
+  </script>
+</body>
+</html>
+
