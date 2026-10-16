@@ -372,6 +372,8 @@
     }
 
     function handleStateUpdate(state) {
+      if (!state) return;
+
       if (candleSeries && state.sol_price > 0 && currentKlines.length > 0) {
         const last = { ...currentKlines[currentKlines.length - 1] };
         last.close = state.sol_price;
@@ -380,34 +382,52 @@
         candleSeries.update(last);
       }
 
-      const pStr = `$${state.sol_price.toFixed(2)}`;
-      document.getElementById('solPrice').innerText = pStr;
-      document.getElementById('hudSolPrice').innerText = pStr;
+      if (state.sol_price > 0) {
+        const pStr = `$${state.sol_price.toFixed(2)}`;
+        const sEl = document.getElementById('solPrice');
+        if (sEl) sEl.innerText = pStr;
+        const hEl = document.getElementById('hudSolPrice');
+        if (hEl) hEl.innerText = pStr;
+      }
 
-      const chg = state.price_change_24h;
-      const chgStr = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
-      const chgEl = document.getElementById('solChange');
-      chgEl.innerText = chgStr;
-      chgEl.className = chg >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+      if (state.price_change_24h !== undefined) {
+        const chg = state.price_change_24h;
+        const chgStr = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}% (24h)`;
+        const chgEl = document.getElementById('solChange');
+        if (chgEl) {
+          chgEl.innerText = chgStr;
+          chgEl.className = chg >= 0 ? 'text-xs font-semibold text-emerald-400' : 'text-xs font-semibold text-rose-400';
+        }
+      }
 
       const ans = state.analysis;
-      currentAnalysis = ans;
+      if (ans) {
+        currentAnalysis = ans;
+        const isBull = ans.trend === 'BULLISH';
 
-      const isBull = ans.trend === 'BULLISH';
-      const trendBadge = document.getElementById('trendBadge');
-      trendBadge.innerText = ans.trend;
-      trendBadge.className = isBull 
-        ? 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold'
-        : 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold';
+        const trendBadge = document.getElementById('trendBadge');
+        if (trendBadge) {
+          trendBadge.innerText = ans.trend || 'NEUTRAL';
+          trendBadge.className = isBull
+            ? 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold'
+            : 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold';
+        }
 
-      const hudTrend = document.getElementById('hudTrendBadge');
-      hudTrend.innerText = `TREND: ${ans.trend}`;
-      hudTrend.className = isBull ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+        const hudTrend = document.getElementById('hudTrendBadge');
+        if (hudTrend) {
+          hudTrend.innerText = `TREND: ${ans.trend || 'NEUTRAL'}`;
+          hudTrend.className = isBull ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold';
+        }
 
-      document.getElementById('confluenceBadge').innerText = `${ans.confidence}% Confluencia`;
-      document.getElementById('hudConfluenceBadge').innerText = `SMC: ${ans.confidence}%`;
+        const confBadge = document.getElementById('confluenceBadge');
+        if (confBadge) confBadge.innerText = `${ans.confidence || 0}% Confluencia`;
 
-      drawSMCIndicators(ans);
+        const hudConf = document.getElementById('hudConfluenceBadge');
+        if (hudConf) hudConf.innerText = `SMC: ${ans.confidence || 0}%`;
+
+        drawSMCIndicators(ans);
+        updateDataTables(ans);
+      }
     }
 
     function drawSMCIndicators(analysis) {

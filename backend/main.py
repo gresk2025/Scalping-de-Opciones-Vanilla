@@ -193,13 +193,6 @@ async def serve_index(request: Request):
     return {"message": "Frontend no encontrado."}
 
 @app.get("/grafico")
-@app.get("/trading")
-def get_trading_page(request: Request):
-    if not is_user_authenticated(request):
-        return RedirectResponse(url="/login")
-    trading_file = FRONTEND_DIR / "trading.html"
-    return FileResponse(trading_file)
-
 @app.get("/chart")
 async def serve_chart(request: Request):
     if not is_user_authenticated(request):
@@ -208,6 +201,15 @@ async def serve_chart(request: Request):
     if chart_file.exists():
         return FileResponse(chart_file)
     return {"message": "Módulo de gráfico no encontrado."}
+
+@app.get("/trading")
+async def get_trading_page(request: Request):
+    if not is_user_authenticated(request):
+        return RedirectResponse(url="/login")
+    trading_file = FRONTEND_DIR / "trading.html"
+    if trading_file.exists():
+        return FileResponse(trading_file)
+    return {"message": "Página de trading no encontrada."}
 
 @app.get("/api/state")
 async def get_state(request: Request):
